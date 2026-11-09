@@ -703,7 +703,7 @@ function useSkill(which='main'){
  if(!k||ph!=='play'||me.role==='gk'||me.sl>0||me.stun>0||me.spin>0)return;
  const cd=skillCd(me,which);if(cd>0)return toast(k.n+' đang hồi chiêu: '+Math.ceil(cd)+' giây',.8);
  // Người vào phòng gửi lệnh skill tới máy chủ; máy chủ là nơi thực thi bóng và va chạm.
- if(net&&!net.host){if(!net.tx({t:'sk',which})){toast('Mạng đang nghẽn, chưa gửi được kỹ năng',1);return}setSkillCd(me,which,k.cd);if(n==='Kaze')ska=k.du;addFlow(12,me);toast(which==='rain'?'Đang dùng Rain Ball Flick...':n==='Sora'?'Đang dùng Spin Dribble...':k.n+'!',.8);return}
+ if(net&&!net.host){const kk=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);if(!net.tx({t:'sk',which,y:yaw,k:kk})){toast('Mạng đang nghẽn, chưa gửi được kỹ năng',1);return}setSkillCd(me,which,k.cd);if(n==='Kaze')ska=k.du;addFlow(12,me);toast(which==='rain'?'Đang dùng Rain Ball Flick...':n==='Sora'?'Đang dùng Spin Dribble...':k.n+'!',.8);return}
  if(skillApply(which,me,yaw,(K.KeyD?8:0)|(K.KeyA?2:0)|(K.KeyW?1:0)|(K.KeyS?4:0)))addFlow(12,me);else toast(n==='Sora'||n==='Mio'||n==='Haru'?(n==='Sora'?'Cần đứng gần bóng để dùng kỹ năng':n==='Mio'?'Cần đứng gần bóng để dùng Phantom Touch':'Cần đứng gần bóng để dùng Meteor Header'):'Không thể dùng kỹ năng lúc này',.8);
 }
 function skillBallTick(actor,dt){
@@ -815,11 +815,11 @@ if(i==3&&win){show('🏆 VÔ ĐỊCH!',txt+'. '+CH[sel].n+' đưa đội Xanh l�
 if((i==1&&tour.pts<2)||(i==2&&!win)||(i==3&&!win)){show(i==3?'Á quân':'Bị loại',txt+'. '+(i==1?'Bạn chỉ có '+tour.pts+' điểm sau vòng loại, chưa đủ 2 điểm để đi tiếp.':i==2?'Bạn dừng bước ở bán kết.':'Chỉ thiếu một chút nữa là có cúp.'),bracketHTML(-1),[again,chp,mn]);return}
 const nt=i==0?(tour.pts==3?'Bạn có 3 điểm, đã chắc suất vào bán kết, vẫn còn trận 2 để đá.':tour.pts==1?'Ở trận 2 cần ít nhất hòa để đủ 2 điểm.':'Thua trận đầu vẫn còn trận 2, cần thắng để đi tiếp.'):i==1?'Bạn vào bán kết với '+tour.pts+' điểm.':'Bạn vào chung kết!';
 show(win?'Chiến thắng':w==1?'Thất bại':'Hòa',txt+'. '+nt,bracketHTML(i+1),[['Trận tiếp theo',()=>{tour.i++;startMatch()}],mn])}
-function shoot(){if(net&&!net.host){if(ph==='play'&&charging){if(me.charIndex===5)me._mioBallLock=false;net.tx({t:'sh',c:chg,m:mode});matchStats.shots++;addFlow(7,me)}charging=false;chg=0;return}if(ph==='pen'){if(charging&&pn&&pn.k==0&&pn.st==='aim')penShoot();charging=false;return}
+function shoot(){if(net&&!net.host){if(ph==='play'&&charging){if(me.charIndex===5)me._mioBallLock=false;const kk=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);net.tx({t:'sh',c:chg,m:mode,y:yaw,k:kk});matchStats.shots++;addFlow(7,me)}charging=false;chg=0;return}if(ph==='pen'){if(charging&&pn&&pn.k==0&&pn.st==='aim')penShoot();charging=false;return}
 const c=chg;charging=false;chg=0;if(ph!=='play')return;const ballWasLocked=!!(me.charIndex===5&&me._mioBallLock),ballGap=ballWasLocked?0:Math.hypot(b.p.x-me.p.x,b.p.z-me.p.z);if(ballWasLocked)me._mioBallLock=false;const volley=mode===0&&me.charIndex===2&&b.rainVolley>0&&b.rainPhase===2&&ballGap<2.85&&b.p.y>R+.12&&b.p.y<R+1.55;
 const f=fw(),r={x:Math.cos(yaw),z:Math.sin(yaw)},ego=mode===0&&c>.95,S=me.s,pm=.7+.06*S.sht,cm=.6+.08*S.tec,shotMul=(me.charIndex===1?1.7:1)*(flowLeft(me)>0?1.18:1),er=(Math.random()-.5)*(10-S.tec)*.022;let sd=(K.KeyD?1:0)-(K.KeyA?1:0);if(!sd)sd=((-me.p.x)*r.x+(hz*Math.sign(f.z)-me.p.z)*r.z)>0?1:-1;
 if(volley){matchStats.shots++;addFlow(8,me);me.spin=0;me.spinType='';me.sa=0;b.knuckle=0;b.knuckleT=0;b.fire=0;const power=Math.min(56,(29+c*12)*pm)*shotMul;b.v.set(f.x*power,5.2+c*2.8,f.z*power);b.cv=sd*6.5*cm;b.ct=.5;b.cd=.12;b.rainVolley=0;b.rainPhase=0;b.rainBounces=0;b.volleyFx=.85;b.rainFxT=0;b.rainImpactFx=0;b.soraShield=0;me.v.x+=f.x*1.8;me.v.z+=f.z*1.8;me.cd=.42;me.a=Math.atan2(f.x,f.z);for(let i=0;i<22;i++)zspark(b.p.x,b.p.y,b.p.z,[.75,.52,1],.5);toast('RAIN VOLLEY!',1.05);return}
-if(ballGap>1.5||b.p.y>1.4)return;matchStats.shots++;addFlow(7,me);me.spin=0;me.spinType='';me.sa=0;b.knuckle=0;b.knuckleT=0;b.fire=0;
+if(ballGap>(me._remoteNetworkAction?2.05:1.5)||b.p.y>(me._remoteNetworkAction?1.65:1.4))return;matchStats.shots++;addFlow(7,me);me.spin=0;me.spinType='';me.sa=0;b.knuckle=0;b.knuckleT=0;b.fire=0;
 if(mode===0){const s=Math.min(56,(ego?42:12+c*24)*pm)*shotMul;b.v.set(f.x*s,1.2+c*3.5,f.z*s);b.ct=0;if(ego)toast('Ego Shot!',.8)}
 else if(mode===1||mode===2){const o=mode===1?.22:.3,s=Math.min(52,((mode===1?16:19)+c*14)*pm)*shotMul,x=f.x-r.x*sd*o,z=f.z-r.z*sd*o,n=Math.hypot(x,z);b.v.set(x/n*s,(mode===1?2.2:1.3)+c*3,z/n*s);b.cv=sd*(mode===1?10:16)*cm;b.ct=1.4;b.cd=mode===1?0:.2;toast(mode===1?'Cứa lòng!':'Trivela!',.8)}
 else if(mode===3){const s=Math.min(38,(18+c*13)*pm)*shotMul;b.v.set(f.x*s,7.8+c*5.2,f.z*s);b.ct=0;b.cv=0;toast('CHIP SHOT · BÓNG BỔNG!',.95)}
@@ -827,7 +827,7 @@ else if(mode===3){const s=Math.min(38,(18+c*13)*pm)*shotMul;b.v.set(f.x*s,7.8+c*
 const ce=Math.cos(er),se=Math.sin(er),vx=b.v.x,vz=b.v.z;b.v.x=vx*ce-vz*se;b.v.z=vx*se+vz*ce;
 me.cd=.4;me.a=Math.atan2(f.x,f.z)}
 function passPlayer(actor=me){if(ph!=='play'||actor.sl>0||actor.stun>0||actor.spin>0)return false;if(net&&!net.host&&actor===me){if(!net.tx({t:'pa'}))return toast('Mạng đang nghẽn, chưa chuyền được',.8);if(actor.charIndex===5)actor._mioBallLock=false;matchStats.passes++;addFlow(14,actor);toast('CHUYỀN BÓNG!',.8);return true}
- const gap=actor.charIndex===5&&actor._mioBallLock?0:Math.hypot(b.p.x-actor.p.x,b.p.z-actor.p.z);if(gap>1.8||b.p.y>1.35){if(actor===me)toast('Cần đến gần bóng để chuyền',.8);return false}
+ const gap=actor.charIndex===5&&actor._mioBallLock?0:Math.hypot(b.p.x-actor.p.x,b.p.z-actor.p.z),passRange=net&&net.host&&actor===P[5]?cl(1.95+(net.rtt||0)*.001,1.95,2.2):1.8;if(gap>passRange||b.p.y>1.35){if(actor===me)toast('Cần đến gần bóng để chuyền',.8);return false}
  const f={x:Math.sin(actor.a),z:Math.cos(actor.a)},team=actor.t,candidates=P.filter(q=>q!==actor&&q.t===team&&q.role!=='gk');let best=null,bestScore=-1e9;
  for(const q of candidates){const dx=q.p.x-actor.p.x,dz=q.p.z-actor.p.z,L=Math.hypot(dx,dz);if(L<3||L>23)continue;const forward=(dx*f.x+dz*f.z)/L;let lane=0;for(const e of P){if(e.t===team||e.role==='gk')continue;const u=cl(((e.p.x-actor.p.x)*dx+(e.p.z-actor.p.z)*dz)/(L*L),0,1);if(Math.hypot(actor.p.x+dx*u-e.p.x,actor.p.z+dz*u-e.p.z)<1.35)lane+=1.4}const open=Math.min(8,...P.filter(e=>e.t!==team&&e.role!=='gk').map(e=>Math.hypot(e.p.x-q.p.x,e.p.z-q.p.z)));const score=forward*7+open*.65-L*.11-lane;if(score>bestScore){bestScore=score;best=q}}
  if(!best)return actor===me?toast('Chưa có đồng đội trống để chuyền',.8):false;if(actor.charIndex===5)actor._mioBallLock=false;const dx=best.p.x+best.v.x*.32-b.p.x,dz=best.p.z+best.v.z*.32-b.p.z,L=Math.hypot(dx,dz)||1,speed=cl(12+L*.65,15,25);b.v.set(dx/L*speed,.85,dz/L*speed);b.ct=0;b.cv=0;b.cd=0;actor.cd=.4;actor.a=Math.atan2(dx,dz);lastPasserTeam=team;lastPassAt=performance.now();matchStats.passes++;addFlow(14,actor);if(actor===me||actor.human)toast('CHUYỀN CHÍNH XÁC!',.9);return true}
@@ -956,7 +956,7 @@ if(o._tetsuWall>0){P.forEach(q=>{if(q.t!==o.t&&q.role!=='gk'&&q.stun<=0&&Math.hy
 if(b.fire>0&&Math.hypot(b.v.x,b.v.z)>22){if(o.t&&d<1&&b.p.y<1.8&&o.stun<=0){o.stun=.9;o.cd=.8;o.v.x*=.2;o.v.z*=.2;toast('Hậu vệ bị hất ngã!',.6)}return}
 const meteorHead=o._haruMeteor>0&&o.charIndex===4&&d<.95&&Math.abs(b.p.y-(o.p.y+1.6))<.82;
 if(!(o.human&&b.rainVolley>0)&&(meteorHead||(d<.7+.05*o.s.air&&o.cd<=0&&o.sl<=0&&o.stun<=0&&b.p.y-o.p.y>1.15&&b.p.y-o.p.y<2.4))){const f=o.rf||fw();head(o,o.human?f.x:aiHeadX(o)-o.p.x,o.human?f.z:(o.t?hz:-hz)-o.p.z,o.human?12+(charging?8:0)+Math.min(8,Math.hypot(b.v.x,b.v.z)*.3):17+Math.random()*8);return}
-if(!(spinner&&o!==spinner&&o.t!==spinner.t&&o.role!=='gk'&&Math.hypot(o.p.x-spinner.p.x,o.p.z-spinner.p.z)<1.5)&&(o.human?d<1.08:d<.8)&&b.p.y<1&&o.cd<=0){const n=d||1;b.v.x=o.v.x*1.15+ex/n*1.6;b.v.z=o.v.z*1.15+ez/n*1.6;b.v.y*=.3;if(!o.human){const af=o.t?1:-1;if(b.v.z*af<.5)b.v.z=af*(Math.abs(b.v.z)+1.5)}b.ct=0}});
+const remoteTouch=o.human&&net&&net.host&&o===P[5],touchRadius=remoteTouch?cl(1.22+(net.rtt||0)*.002,1.22,1.62):(o.human?1.08:.8);if(!(spinner&&o!==spinner&&o.t!==spinner.t&&o.role!=='gk'&&Math.hypot(o.p.x-spinner.p.x,o.p.z-spinner.p.z)<1.5)&&d<touchRadius&&b.p.y<1&&o.cd<=0){const n=d||1;b.v.x=o.v.x*1.15+ex/n*1.6;b.v.z=o.v.z*1.15+ez/n*1.6;b.v.y*=.3;if(!o.human){const af=o.t?1:-1;if(b.v.z*af<.5)b.v.z=af*(Math.abs(b.v.z)+1.5)}b.ct=0}});
 for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++){const A=P[i],B=P[j];if(A._bench||B._bench)continue;if((A._mioTouch>0||B._mioTouch>0)&&A.t!==B.t)continue;if((me.spin>0&&(A===me||B===me))||(net&&net.host&&P[5].spin>0&&(A===P[5]||B===P[5])))continue;const ex=B.p.x-A.p.x,ez=B.p.z-A.p.z,d=Math.hypot(ex,ez);if(d<.7&&d>0){const u=(.7-d)/2/d;A.p.x-=ex*u;A.p.z-=ez*u;B.p.x+=ex*u;B.p.z+=ez*u}}
 koTick(dt);gkTick(dt);skTick(dt);remoteSkillTick(dt);ball(dt);tl-=dt;if(tl<=0&&ph==='play')end()}
 
@@ -1017,7 +1017,7 @@ let net=null,pg='play';
 const stt=i=>{const s=CH[i].s;return{spd:s[0],sht:s[1],tec:s[2],def:s[3],air:s[4]}},f2=x=>+x.toFixed(2);
 const lb=()=>gm=='lh'?['Tạo phòng',()=>pinScr('h')]:gm=='lg'?['Vào phòng',()=>pinScr('g')]:[gm=='tour'?'Vào giải đấu':'Vào sân',gm=='tour'?startTour:startFriendly];
 function lob(p,btns,ex){ph='end';show('Phòng LAN',p,ex||'',btns)}
-function lanMenu(){show('CHƠI ONLINE · MÁY CHỦ TRUNG TÂM','Hai máy kết nối cùng máy chủ của game qua WebSocket bảo mật. Máy chủ quản lý mã phòng và chuyển tiếp dữ liệu gọn nhẹ; game không truyền hình ảnh màn hình. Bản này là bước chuyển mạng trung tâm: phần mô phỏng bóng/va chạm hiện vẫn do máy chủ phòng chạy, chưa phải mô phỏng vật lý hoàn toàn trên VPS.','',[['Tạo phòng',()=>{gm='lh';csScreen()}],['Vào phòng',()=>{gm='lg';csScreen()}],['Kiểm tra kết nối',netTest],['Quay lại',title]])}
+function lanMenu(){show('CHƠI ONLINE · MÁY CHỦ TRUNG TÂM','Hai máy kết nối cùng máy chủ Render qua WebSocket bảo mật. Máy chủ chuyển tiếp input và trạng thái; máy chủ phòng mô phỏng bóng/va chạm. Game không truyền hình ảnh màn hình.','',[['Tạo phòng',()=>{gm='lh';csScreen()}],['Vào phòng',()=>{gm='lg';csScreen()}],['Kiểm tra kết nối',netTest],['Quay lại',title]])}
 function pinScr(role){const h=role=='h',A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',g=[0,0,0,0,0].map(()=>A[Math.random()*32|0]).join('');
 lob(h?'Tạo phòng trên máy chủ trung tâm. Gửi mã phòng cho người chơi thứ hai.':'Nhập mã phòng mà người chơi thứ nhất đã gửi. Cả hai cần mở game từ CÙNG địa chỉ máy chủ (không mở file HTML trực tiếp).',
 [[h?'Tạo phòng':'Vào phòng',()=>{const q=$('pin').value.trim().toUpperCase();if(q.length<3)return alert('Mã phòng cần ít nhất 3 ký tự');lan(role,q)}],['Nối thủ công (dự phòng)',()=>manual(role)],['Quay lại',()=>{gm=h?'lh':'lg';csScreen()}]],
@@ -1033,29 +1033,29 @@ function lanOff(){if(net){const w=[net.w,net.pc,net.sig];clearInterval(net.pingT
 function look(o,i){const c=CH[i],u=o.m.userData;o.charIndex=i;u.hair.color.setHex(c.h);hairdo(o.m,c.hs);u.skin.color.setHex(c.k);if(u.band){u.band.color.setHex(c.b);u.ring.color.setHex(c.b)}}
 function lan(role,pin){if(location.protocol!=='http:'&&location.protocol!=='https:')return lob('Bạn đang mở file HTML trực tiếp. Hãy mở game bằng địa chỉ web của máy chủ trung tâm (https://...).',[['Về menu',title]]);const u=location.host;
 let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+u+'/ws')}catch(e){return lob('Không thể mở kết nối tới máy chủ trung tâm.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}
-const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>w.readyState==1&&w.send(JSON.stringify(m));
+const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>{if(w.readyState!==1)return false;const q=w.bufferedAmount||0;if((m.t==='i'&&q>24576)||(m.t==='s'&&q>65536)||(m.t==='pos'&&q>24576))return false;if(q>262144){try{w.close(4001,'network buffer exceeded')}catch(_){}return false}try{w.send(JSON.stringify(m));return true}catch(_){return false}};
 if(!n.host)P[5].s=stt(sel);lob('Đang kết nối máy chủ trung tâm '+u+'...',[['Hủy',title]]);
 w.onopen=()=>n.tx({t:role,sel,pin});w.onmessage=e=>{if(net===n){try{onNet(JSON.parse(e.data))}catch(_){}}};
 w.onerror=()=>{};w.onclose=()=>{if(net===n){net=null;clearInterval(n.pingTimer);me=P[0];P[5].human=0;lob(n.ok?'Mất kết nối với máy chủ trung tâm.':'Không kết nối được máy chủ. Hãy kiểm tra địa chỉ VPS và trạng thái server.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}}}
 function sendServerPose(dt){if(!net||!net.serverAuth||!net.ok||ph!=='play')return;net.poseTs=(net.poseTs||0)-dt;if(net.poseTs>0)return;net.poseTs=1/30;const o=me;net.tx({t:'pos',n:net.poseSeq=(net.poseSeq|0)+1,x:f2(o.p.x),y:f2(o.p.y),z:f2(o.p.z),a:f2(o.a),vx:f2(o.v.x),vy:f2(o.vy||0),vz:f2(o.v.z),sl:o.sl>0?1:0,st:o.stun>0?1:0,hd:o.hd>0?1:0,lz:f2(o.lz||0)});}
-function receiveServerPose(m){if(!net||!net.serverAuth||m.p===net.slot)return;const idx=m.p===0?0:5,o=P[idx];if(!o)return;o._serverPose={x:m.x,y:m.y,z:m.z,a:m.a,vx:m.vx,vy:m.vy,vz:m.vz,sl:m.sl,st:m.st,hd:m.hd,lz:m.lz};o.human=true;}
-function applyServerPose(o,dt){const p=o&&o._serverPose;if(!p)return;const k=1-Math.exp(-22*dt);o.p.x+=(p.x-o.p.x)*k;o.p.y+=(p.y-o.p.y)*k;o.p.z+=(p.z-o.p.z)*k;o.a=ang(o.a,p.a,k);o.v.x+=(p.vx-o.v.x)*k;o.v.z+=(p.vz-o.v.z)*k;o.vy=p.vy;o.sl=p.sl?Math.max(o.sl,0.08):Math.min(o.sl,0);o.stun=p.st?Math.max(o.stun,0.08):Math.min(o.stun,0);o.hd=p.hd?Math.max(o.hd,0.08):Math.min(o.hd,0);o.lz=p.lz;}
+function receiveServerPose(m){if(!net||!net.serverAuth||m.p===net.slot)return;const idx=m.p===0?0:5,o=P[idx];if(!o)return;const old=o._serverPose;if(old&&Number(m.n||0)<=Number(old.n||0))return;o._serverPose={x:m.x,y:m.y,z:m.z,a:m.a,vx:m.vx,vy:m.vy,vz:m.vz,sl:m.sl,st:m.st,hd:m.hd,lz:m.lz,n:m.n||0,at:performance.now()};o.human=true;}
+function applyServerPose(o,dt){const p=o&&o._serverPose;if(!p)return;const age=cl((performance.now()-(p.at||performance.now()))/1000,0,.14),tx=p.x+p.vx*age,ty=cl(p.y+p.vy*age-10*age*age,0,4),tz=p.z+p.vz*age,dist=Math.hypot(tx-o.p.x,ty-o.p.y,tz-o.p.z),k=1-Math.exp(-(dist>5?42:32)*dt);if(dist>12)o.p.set(tx,ty,tz);else{o.p.x+=(tx-o.p.x)*k;o.p.y+=(ty-o.p.y)*k;o.p.z+=(tz-o.p.z)*k;}o.a=ang(o.a,p.a,k);o.v.x+=(p.vx-o.v.x)*k;o.v.z+=(p.vz-o.v.z)*k;o.vy=p.vy;o.sl=p.sl?Math.max(o.sl,0.08):Math.min(o.sl,0);o.stun=p.st?Math.max(o.stun,0.08):Math.min(o.stun,0);o.hd=p.hd?Math.max(o.hd,0.08):Math.min(o.hd,0);o.lz=p.lz;}
 function onNet(m){const n=net,h=n.host;
 if(m.t=='c')return chatAdd(h?'Đỏ':'Xanh',String(m.x).slice(0,120));
-if(m.t=='hp'){n.rtt=Math.max(0,Date.now()-Number(m.s||Date.now()));return}
+if(m.t=='hp'){n.rtt=Math.max(0,Date.now()-Number(m.s||Date.now()));n.rttAt=performance.now();return}
 if(m.t=='err'){n.live=0;return lob(m.m,[['Về menu',title]])}
-if(m.t=='ok'){n.ok=1;if(m.server){n.serverAuth=1;n.slot=m.slot|0;n.poseTs=0;n.poseSeq=0;clearInterval(n.pingTimer);n.pingTimer=setInterval(()=>{if(net===n&&n.ok)n.tx({t:'hb',s:Date.now()})},1500)}return lob(h?'Đang chờ người chơi thứ hai trên máy chủ trung tâm. Gửi mã phòng '+n.pin+' cho người chơi còn lại.':'Đã vào máy chủ trung tâm. Chờ chủ phòng bắt đầu trận...',[['Hủy',title]])}
+if(m.t=='ok'){n.ok=1;if(m.server){n.gateway=1;n.serverAuth=0;n.relay=1;n.slot=m.slot|0;n.poseTs=0;n.poseSeq=0;n.li=0;n.I={k:0,y:Math.PI,sl:0,t:performance.now()};clearInterval(n.pingTimer);n.pingTimer=setInterval(()=>{if(net===n&&n.ok)n.tx({t:'hb',s:Date.now()})},1500)}return lob(h?'Đang chờ người chơi thứ hai trên máy chủ trung tâm. Gửi mã phòng '+n.pin+' cho người chơi còn lại.':'Đã vào máy chủ trung tâm. Chờ chủ phòng bắt đầu trận...',[['Hủy',title]])}
 if(m.t==='pos'){receiveServerPose(m);return}
 if(h){
-if(m.t=='j'){const o=P[5];n.li=0;o.human=1;P[0].human=1;o.s=stt(m.sel);look(o,m.sel);if(ph==='play'||ph==='goal'){n.go=1;n.tx({t:'go',sel});toast('Người chơi 2 đã vào',2)}else lob('Người chơi 2 ('+CH[m.sel].n+') đã vào. Bạn là Xanh, họ là Đỏ.',[['Bắt đầu',startFriendly],['Hủy',title]])}
+if(m.t=='j'){const o=P[5];n.li=0;n.I={k:0,y:Math.PI,sl:0,t:performance.now()};o._remoteNetworkAction=0;o.human=1;P[0].human=1;o.s=stt(m.sel);look(o,m.sel);if(ph==='play'||ph==='goal'){n.go=1;n.tx({t:'go',sel});toast('Người chơi 2 đã vào',2)}else lob('Người chơi 2 ('+CH[m.sel].n+') đã vào. Bạn là Xanh, họ là Đỏ.',[['Bắt đầu',startFriendly],['Hủy',title]])}
 else if(m.t=='i'){if(m.n>(n.li|0)){n.li=m.n;n.I.k=m.k;n.I.y=m.y;n.I.t=performance.now()}}
 else if(m.t=='sl')n.I.sl=1
-else if(m.t=='sh'){if(ph==='play'&&P[5].human)rshoot(P[5],n.I,m.c,m.m)}
+else if(m.t=='sh'){if(Number.isFinite(m.y))n.I.y=m.y;if(Number.isFinite(m.k))n.I.k=m.k|0;n.I.t=performance.now();if(ph==='play'&&P[5].human)rshoot(P[5],n.I,m.c,m.m)}
 else if(m.t=='pa'){if(ph==='play'&&P[5].human)passPlayer(P[5])}
-else if(m.t=='sk'){if(ph==='play'&&P[5].human){if(!skillApply(m.which==='rain'?'rain':'main',P[5],n.I.y,n.I.k))n.tx({t:'skno',which:m.which});else addFlow(12,P[5])}}
-else if(m.t=='bye'){P[5].human=0;toast('Người chơi 2 đã thoát',2);if(ph==='end')lob('Người chơi 2 đã rời. Đang chờ người khác vào phòng '+n.pin+'...',[['Hủy',title]])}}
+else if(m.t=='sk'){if(Number.isFinite(m.y))n.I.y=m.y;if(Number.isFinite(m.k))n.I.k=m.k|0;n.I.t=performance.now();if(ph==='play'&&P[5].human){if(!skillApply(m.which==='rain'?'rain':'main',P[5],n.I.y,n.I.k))n.tx({t:'skno',which:m.which});else addFlow(12,P[5])}}
+else if(m.t=='bye'){P[5].human=0;n.I={k:0,y:Math.PI,sl:0,t:performance.now()};toast('Người chơi 2 đã thoát',2);if(ph==='end')lob('Người chơi 2 đã rời. Đang chờ người khác vào phòng '+n.pin+'...',[['Hủy',title]])}}
 else{
-if(m.t=='go')gstart(m.sel);else if(m.t=='resetPose'){reset();me=P[5];P[0].human=1;P[5].human=1;yaw=Math.PI;P.forEach(o=>o.tp=null);b.tp=null}else if(m.t=='s'){if(ph==='play'&&m.n>(n.ls|0)){n.ls=m.n;snapIn(m)}}
+if(m.t=='go')gstart(m.sel);else if(m.t=='resetPose'){reset();me=P[5];P[0].human=1;P[5].human=1;yaw=Math.PI;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}}else if(m.t=='s'){if(ph==='play'&&m.n>(n.ls|0)){n.ls=m.n;snapIn(m)}}
 else if(m.t=='skno'){if(m.which==='rain')skcRain=0;else{skc=0;if(CH[me.charIndex??sel].n==='Kaze')ska=0}toast('Kỹ năng chưa được máy chủ chấp nhận: hãy đứng gần bóng',1.2)}
 else if(m.t=='end'){ph='end';if(document.exitPointerLock)document.exitPointerLock();show(m.a>m.b?'Xanh thắng':m.a<m.b?'Đỏ thắng':'Hòa','Tỷ số '+m.a+' : '+m.b+'. Chờ chủ phòng bấm Đá lại.','',[['Rời phòng',title]])}
 else if(m.t=='bye')lob('Chủ phòng đã thoát.',[['Về menu',title]])}}
@@ -1297,14 +1297,14 @@ lob('Thêm máy chủ relay (MQTT qua WebSocket) của riêng bạn nếu các m
 try{if(v.length)localStorage.ego_mqtt=JSON.stringify(v);else localStorage.removeItem('ego_mqtt')}catch(e){return alert('Trình duyệt không cho lưu cài đặt.')}netTest()}],['Quay lại',lanMenu]],
 '<textarea id="rly" spellcheck="false" style="width:100%;height:110px">'+esc(cur.map(b=>[b.u,b.user,b.pass].filter(Boolean).join(' ')).join('\n'))+'</textarea>')}
 // Chủ phòng: điều khiển cầu thủ Đỏ số 5 theo phím người chơi 2 gửi sang
-function rctl(o,I,dt){const f={x:Math.sin(I.y),z:-Math.cos(I.y)},r={x:Math.cos(I.y),z:Math.sin(I.y)},S=o.s,k=performance.now()-(I.t||0)<(net&&net.relay?750:450)?I.k:0;o.rf=f;
+function rctl(o,I,dt){const f={x:Math.sin(I.y),z:-Math.cos(I.y)},r={x:Math.cos(I.y),z:Math.sin(I.y)},S=o.s,k=performance.now()-(I.t||0)<(net&&net.relay?700:450)?I.k:0;o.rf=f;
 if(o.spin>0){const dash=o.spinType==='rain'?5.2:2.2;move(o,o.dr.x*dash,o.dr.z*dash,dt,34);return}
 const ix=(k>>3&1)-(k>>1&1),iz=(k&1)-(k>>2&1),l=Math.hypot(ix,iz),sprinting=!!((k&16)&&l>.05&&o.stamina>0&&o.sl<=0&&o.stun<=0);if(sprinting)o.stamina=Math.max(0,o.stamina-27*dt);else o.stamina=Math.min(100,o.stamina+18*dt);const boost=(o===me?ska>0:(o._skillBoost||0)>0)?1.5:1,mioBoost=(o._mioTouch||0)>0?1.28:1,sp=(sprinting?1.31:1)*boost*mioBoost*(o._flowTimer>0?1.18:1)*(6.6+.28*S.spd);let dx=0,dz=0;
 if(l){dx=(f.x*iz+r.x*ix)/l;dz=(f.z*iz+r.z*ix)/l;if(o.sl<=0&&o.stun<=0)o.a=ang(o.a,Math.atan2(dx,dz),1-Math.exp(-12*dt))}
 if(I.sl){I.sl=0;slide(o,l?dx:f.x,l?dz:f.z)}
 if(k&32&&o.p.y<=0&&o.sl<=0&&o.stun<=0)o.vy=7.4*(.85+.03*S.air);
 move(o,dx*sp,dz*sp,dt,7+.4*S.tec)}
-function rshoot(o,I,c,md){const s=[me,yaw,K.KeyA,K.KeyD,mode,chg,charging];me=o;yaw=I.y;K.KeyA=I.k&2;K.KeyD=I.k&8;mode=md;chg=c;shoot();[me,yaw,K.KeyA,K.KeyD,mode,chg,charging]=s}
+function rshoot(o,I,c,md){const s=[me,yaw,K.KeyA,K.KeyD,mode,chg,charging,o._remoteNetworkAction];me=o;o._remoteNetworkAction=1;yaw=I.y;K.KeyA=I.k&2;K.KeyD=I.k&8;mode=md;chg=c;shoot();[me,yaw,K.KeyA,K.KeyD,mode,chg,charging,o._remoteNetworkAction]=s}
 function snap(){return{t:'s',n:net.sq=(net.sq|0)+1,a:net.li|0,ph,tl:f2(tl),g:[s0,s1],b:[f2(b.p.x),f2(b.p.y),f2(b.p.z),f2(b.v.x),f2(b.v.y),f2(b.v.z),f2(b.cv||0),f2(b.ct||0),f2(b.cd||0),f2(b.knuckle||0),f2(b.knuckleT||0),f2(b.knucklePhase||0),f2(b.rainVolley||0),b.rainPhase|0,b.rainBounces|0],q:P.map((o,i)=>{const humanPose=net.serverAuth&&(i===0||i===5);return[humanPose?0:f2(o.p.x),humanPose?0:f2(o.p.y),humanPose?0:f2(o.p.z),humanPose?0:f2(o.a),humanPose?0:f2(o.v.x),humanPose?0:f2(o.v.z),o.sl>0|0,o.stun>0|0,o.hd>0|0,f2(Math.max(0,o.cd)),f2(o.spin||0),o.spinType==='rain'?1:0,f2(o.sa||0),f2(o._skillBoost||0),f2(o._skillMainCd||0),f2(o._skillRainCd||0),f2(o._flowTimer||0),f2(o._haruMeteor||0),f2(o._mioTouch||0),f2(o._tetsuWall||0)]})}}
 // Người chơi 2: nhận ảnh chụp, nội suy mượt, gửi phím 30 lần/giây
 // Người vào phòng: tự chạy thử chuyển động của mình ngay (dự đoán) rồi chỉnh theo máy chủ khi có ảnh chụp mới, nên điều khiển không bị trễ theo ping
@@ -1326,9 +1326,9 @@ net.pf=a5[6]|a5[7]|a5[8];if(pr)reconcile(a5,m.a|0);else if(net.hist)net.hist.len
 const k=m.b,z=!b.tp;if(z)b.tp=new T.Vector3();b.tp.set(k[0],k[1],k[2]);b.v.set(k[3],k[4],k[5]);b.cv=k[6];b.ct=k[7];b.cd=k[8];b.knuckle=k[9]||0;b.knuckleT=k[10]||0;b.knucklePhase=k[11]||0;b.rainVolley=k[12]||0;b.rainPhase=k[13]||0;b.rainBounces=k[14]||0;if(z||b.p.distanceTo(b.tp)>6)b.p.copy(b.tp);
 if(m.g[0]!=s0||m.g[1]!=s1){const t=m.g[1]>s1;s0=m.g[0];s1=m.g[1];$('s0').textContent=s0;$('s1').textContent=s1;toast(t?'Đội Đỏ ghi bàn':'Gooool! Đội Xanh ghi bàn',2.6);amp=3;confT=3;conf.visible=true;burst()}
 if(pg==='goal'&&m.ph==='play')yaw=Math.PI;pg=m.ph;tl=m.tl}
-function gstart(hs){if(net){net.hist=[];net.cin=null;net.pf=0;net.ps=0}ph='play';me=P[5];me.human=1;P[0].human=1;P[5].human=1;me.stamina=100;look(P[0],hs);look(P[5],sel);reset();yaw=Math.PI;s0=s1=0;$('s0').textContent=$('s1').textContent=0;pg='play';yaw=Math.PI;chg=0;charging=false;P.forEach(o=>o.tp=null);b.tp=null;
+function gstart(hs){if(net){net.hist=[];net.cin=null;net.pf=0;net.ps=0}ph='play';me=P[5];me.human=1;P[0].human=1;P[5].human=1;me.stamina=100;look(P[0],hs);look(P[5],sel);reset();yaw=Math.PI;s0=s1=0;$('s0').textContent=$('s1').textContent=0;pg='play';yaw=Math.PI;chg=0;charging=false;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}
 $('menu').style.display='none';$('mm').style.display='';$('pk').style.display='none';$('ret').style.display='none';$('chg').classList.remove('pk');$('chg').style.display='';
-$('stg').textContent=net&&net.serverAuth?'SERVER · Xanh vs Đỏ · bạn là đội Đỏ':'LAN · Xanh vs Đỏ (bạn là đội Đỏ)';$('help').textContent=helpTxt();toast('Vào trận!',1.5);
+$('stg').textContent=net&&net.gateway?'SERVER RELAY · Xanh vs Đỏ · bạn là đội Đỏ':'LAN · Xanh vs Đỏ (bạn là đội Đỏ)';$('help').textContent=helpTxt();toast('Vào trận!',1.5);
 const needsLock=!!(net&&!net.host&&!matchMedia('(pointer:coarse)').matches&&!document.pointerLockElement);$('lockhint').style.display=needsLock?'block':'none';
 try{const r=rd.domElement.requestPointerLock();if(r&&r.catch)r.catch(()=>{$('lockhint').style.display=needsLock?'block':'none'})}catch(e){$('lockhint').style.display=needsLock?'block':'none'}}
 $('lockhint').addEventListener('mousedown',e=>{e.preventDefault();e.stopPropagation()});$('lockhint').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation()},{passive:false});$('lockhint').addEventListener('click',e=>{e.preventDefault();e.stopPropagation();try{const r=rd.domElement.requestPointerLock();if(r&&r.catch)r.catch(()=>toast('Trình duyệt từ chối khóa chuột. Hãy bấm trực tiếp vào sân.',1.5))}catch(x){toast('Không thể khóa chuột trên trình duyệt này',1.5)}});
@@ -1374,9 +1374,9 @@ function gstep(dt){if(ph!=='play')return;me._flowTimer=Math.max(0,(me._flowTimer
 const k=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);
 if(K.KeyE||K.ArrowRight)yaw+=1.8*dt;if(K.KeyQ||K.ArrowLeft)yaw-=1.8*dt;
 if(charging)chg=Math.min(1,chg+dt*(.85+.05*me.s.tec));
-if(wantSlide){wantSlide=false;net.tx({t:'sl'});net.ps=performance.now()+(net.rtt||300)+900}
+if(wantSlide){wantSlide=false;net.tx({t:'sl'});if(me.sl<=0&&me.stun<=0){const f={x:Math.sin(yaw),z:-Math.cos(yaw)},r={x:Math.cos(yaw),z:Math.sin(yaw)},ix=(K.KeyD?1:0)-(K.KeyA?1:0),iz=(K.KeyW?1:0)-(K.KeyS?1:0),L=Math.hypot(ix,iz);slide(me,L?(f.x*iz+r.x*ix)/L:f.x,L?(f.z*iz+r.z*ix)/L:f.z)}}
 skTick(dt);
-if((net.ts-=dt)<=0){net.ts=1/30;const y=+yaw.toFixed(3);net.cin={n:net.si=(net.si|0)+1,k,y};if(!net.serverAuth)net.tx({t:'i',n:net.si,k,y})}
+if((net.ts-=dt)<=0){net.ts=1/30;const y=+yaw.toFixed(3);net.cin={n:net.si=(net.si|0)+1,k,y};net.tx({t:'i',n:net.si,k,y})}
 const pd=pOn();if(pd)pRun(dt);if(net.serverAuth){if(me.p.y>0||me.vy>0){me.vy-=20*dt;me.p.y=Math.max(0,me.p.y+me.vy*dt);if(me.p.y===0)me.vy=0}applyServerPose(P[0],dt);sendServerPose(dt)}
 const q=1-Math.exp(-28*dt);P.forEach((o,i)=>{if(net.serverAuth&&(i===0||i===5))return;if(!o.tp)return;o.tp.x+=o.v.x*dt;o.tp.z+=o.v.z*dt;if(o===me&&pd){o.p.y+=(o.tp.y-o.p.y)*q;return}o.p.lerp(o.tp,q)});
 if(b.tp){gball(dt);b.p.lerp(b.tp,1-Math.exp(-45*dt));b.m.position.copy(b.p);const sp=Math.hypot(b.v.x,b.v.z);if(sp>.05&&b.knuckle<=0)b.m.rotateOnWorldAxis(new T.Vector3(b.v.z,0,-b.v.x).normalize(),sp*dt/R)}}
@@ -1423,7 +1423,7 @@ const mg=$('mm').getContext('2d'),MX=x=>45+x/hx*40,MZ=z=>70+z/hz*65;function min
 const cpos=new T.Vector3(),pv=new T.Vector3();let last=performance.now(),t0=0,crowdAcc=0;try{stadiumIndex=cl(Number(localStorage.getItem('ego_stadium'))||0,0,STADIUMS.length-1)}catch(e){}paintStadium();crowd(0,0);reset();applyChar();title();
 function loop(n,bg){if(!bg)requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.033);last=n;t0+=dt;
 if(net&&!net.host)gstep(dt);else if(ph==='play'){step(dt);if(net&&net.host&&net.serverAuth)sendServerPose(dt)}else if(ph==='goal'){if(replayActive)updateGoalReplay(dt);else ball(dt);gt-=dt;if(gt<=0){replayActive=false;$('goalReplay').classList.remove('on');reset();ph='play';if(net&&net.host&&net.serverAuth)net.tx({t:'resetPose'});replayBuffer=[];toast('Đội '+(kteam?'Đỏ':'Xanh')+' giao bóng',1.6)}}else if(ph==='pen')penStep(dt);else if(ph==='pt'){ptT-=dt;if(ptT<=0)ptF()}
-if(ph==='play')recordReplay(dt);if(net&&net.host&&net.go&&(ph==='play'||ph==='goal')&&(net.ts-=dt)<=0){net.ts=1/20;net.tx(snap())}
+if(ph==='play')recordReplay(dt);if(net&&net.host&&net.go&&(ph==='play'||ph==='goal')&&(net.ts-=dt)<=0){net.ts=1/30;net.tx(snap())}
 if(ph==='cs')me.a=t0*.9;
 if(ph==='pen')penAnim();
 {const u=P[5].m.userData,v=!!P[5].human;if(u.ring)u.ring.visible=v;if(u.mk)u.mk.visible=v;if(u.band)u.band.visible=true}
@@ -1443,7 +1443,7 @@ else{const f=fw();cpos.set(cl(me.p.x-f.x*5.4,-hx-1.2,hx+1.2),3.3,cl(me.p.z-f.z*5
 {const tf=ph==='goal'&&replayActive?54:ska>0&&ph==='play'?70:62;if(Math.abs(cam.fov-tf)>.05){cam.fov+=(tf-cam.fov)*(1-Math.exp(-5*dt));cam.updateProjectionMatrix()}}
 if(ph==='pen'&&pn.k==0&&pn.st==='aim'){pv.set(pn.ax,pn.ay,pn.g*hz).project(cam);const rt=$('ret').style;rt.left=((pv.x+1)/2*innerWidth)+'px';rt.top=((1-pv.y)/2*innerHeight)+'px'}
 document.body.classList.toggle('nm',ph==='menu'||ph==='cs'||ph==='end');$('tb-q').style.display=ph==='play'&&me.role==='gk'?'flex':'none';$('tb-e').style.display=ph==='play'&&me.role==='gk'?'flex':'none';$('chat').style.display=net&&net.ok?'block':'none';
-{const e=$('png'),r=net&&net.ok&&net.rtt!=null&&performance.now()-(net.rttAt||0)<3500?Math.round(net.rtt):0,t=r?'Relay RTT '+r+' ms':'';if(e.dataset.s!==t){e.dataset.s=t;e.textContent=t;e.style.display=t?'block':'none';e.style.color=r<120?'#7dffa0':r<250?'#ffd75e':'#ff7b7b'}}
+{const e=$('png'),r=net&&net.ok&&net.rtt!=null&&performance.now()-(net.rttAt||0)<3500?Math.round(net.rtt):0,t=r?(net&&net.serverAuth?'Server RTT ':'Relay RTT ')+r+' ms':'';if(e.dataset.s!==t){e.dataset.s=t;e.textContent=t;e.style.display=t?'block':'none';e.style.color=r<120?'#7dffa0':r<250?'#ffd75e':'#ff7b7b'}}
 if(window.__egoMissionTick)window.__egoMissionTick();$('cb').style.width=chg*100+'%';$('cb').className=chg>.95?'f':'';flowHUD();{const st=cl(me.stamina||0,0,100),e=$('stf');e.style.width=st+'%';e.style.background=st<22?'linear-gradient(90deg,#c92b42,#ff7b86)':'linear-gradient(90deg,#12b76a,#8cffb5)';$('stv').textContent=Math.round(st)+'%';$('stam').style.display=(ph==='play'||ph==='goal')?'block':'none'}const volleyReady=ph==='play'&&me.charIndex===2&&b.rainVolley>0&&b.rainPhase===2&&b.p.y>R+.12&&b.p.y<R+1.55&&Math.hypot(b.p.x-me.p.x,b.p.z-me.p.z)<2.85;$('volleyHint').classList.toggle('on',volleyReady);skUI();
 const s=Math.max(0,Math.ceil(tl));$('tm').textContent=Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
 if(!bg){if(ph!=='pen')mini();rd.render(sc,cam)}}

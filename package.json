@@ -1,11 +1,7 @@
 {
   "name": "ego-futsal-server",
-  "version": "1.2.0",
+  "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": ">=20 <27"
-  }
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" }
 }

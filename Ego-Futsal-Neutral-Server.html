@@ -1030,6 +1030,10 @@ if(e.target===ci){e.stopPropagation();if(e.code=='Enter'){const t=ci.value.trim(
 if(e.code=='Enter'&&net&&net.ok&&!e.repeat&&e.target!==$('pin')){e.preventDefault();e.stopPropagation();for(const k in K)K[k]=0;charging=false;ci.style.display='block';ci.focus()}},true);
 addEventListener('keyup',e=>{if(e.target===ci)e.stopPropagation()},true);
 function lanOff(){if(net){const w=[net.w,net.pc,net.sig];clearInterval(net.pingTimer);try{net.wl&&net.wl.release()}catch(e){}net=null;w.forEach(x=>{try{x&&x.close()}catch(e){}})}me=P[0];P[5].human=0;pg='play'}
+// Clear stale movement and prediction history whenever the host resets kickoff.
+// The Render gateway relays resetPose; the room host still owns match simulation.
+function clearNetControlAfterReset(){if(!net)return;const now=performance.now();for(const key in K)K[key]=0;charging=false;chg=0;wantSlide=false;if(net.I){net.I.k=0;net.I.sl=0;net.I.y=net.host?Math.PI:yaw;net.I.t=now}if(Array.isArray(net.hist))net.hist.length=0;net.pf=0;net.ps=0;if(!net.host){net.cin={n:net.si|0,k:0,y:yaw};if(me){if(!me.tp)me.tp=new T.Vector3();me.tp.copy(me.p);me.v.set(0,0,0);me.vy=0}if(P[0]){if(!P[0].tp)P[0].tp=new T.Vector3();P[0].tp.copy(P[0].p)}}}
+
 function look(o,i){const c=CH[i],u=o.m.userData;o.charIndex=i;u.hair.color.setHex(c.h);hairdo(o.m,c.hs);u.skin.color.setHex(c.k);if(u.band){u.band.color.setHex(c.b);u.ring.color.setHex(c.b)}}
 function lan(role,pin){if(location.protocol!=='http:'&&location.protocol!=='https:')return lob('Bạn đang mở file HTML trực tiếp. Hãy mở game bằng địa chỉ web của máy chủ trung tâm (https://...).',[['Về menu',title]]);const u=location.host;
 let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+u+'/ws')}catch(e){return lob('Không thể mở kết nối tới máy chủ trung tâm.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}
@@ -1055,7 +1059,7 @@ else if(m.t=='pa'){if(ph==='play'&&P[5].human)passPlayer(P[5])}
 else if(m.t=='sk'){if(Number.isFinite(m.y))n.I.y=m.y;if(Number.isFinite(m.k))n.I.k=m.k|0;n.I.t=performance.now();if(ph==='play'&&P[5].human){if(!skillApply(m.which==='rain'?'rain':'main',P[5],n.I.y,n.I.k))n.tx({t:'skno',which:m.which});else addFlow(12,P[5])}}
 else if(m.t=='bye'){P[5].human=0;n.I={k:0,y:Math.PI,sl:0,t:performance.now()};toast('Người chơi 2 đã thoát',2);if(ph==='end')lob('Người chơi 2 đã rời. Đang chờ người khác vào phòng '+n.pin+'...',[['Hủy',title]])}}
 else{
-if(m.t=='go')gstart(m.sel);else if(m.t=='resetPose'){reset();me=P[5];P[0].human=1;P[5].human=1;yaw=Math.PI;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}}else if(m.t=='s'){if(ph==='play'&&m.n>(n.ls|0)){n.ls=m.n;snapIn(m)}}
+if(m.t=='go')gstart(m.sel);else if(m.t=='resetPose'){reset();me=P[5];P[0].human=1;P[5].human=1;yaw=Math.PI;P.forEach(o=>{o.tp=null;o._tpAge=0});b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}clearNetControlAfterReset()}else if(m.t=='s'){if(ph==='play'&&m.n>(n.ls|0)){n.ls=m.n;snapIn(m)}}
 else if(m.t=='skno'){if(m.which==='rain')skcRain=0;else{skc=0;if(CH[me.charIndex??sel].n==='Kaze')ska=0}toast('Kỹ năng chưa được máy chủ chấp nhận: hãy đứng gần bóng',1.2)}
 else if(m.t=='end'){ph='end';if(document.exitPointerLock)document.exitPointerLock();show(m.a>m.b?'Xanh thắng':m.a<m.b?'Đỏ thắng':'Hòa','Tỷ số '+m.a+' : '+m.b+'. Chờ chủ phòng bấm Đá lại.','',[['Rời phòng',title]])}
 else if(m.t=='bye')lob('Chủ phòng đã thoát.',[['Về menu',title]])}}
@@ -1315,15 +1319,16 @@ function reconcile(a,ack){const h=net.hist;while(h.length&&h[0].n<=ack)h.shift()
 const px=me.p.x,pz=me.p.z,vx=me.v.x,vz=me.v.z,ma=me.a;
 me.p.x=a[0];me.p.z=a[2];me.v.x=a[4];me.v.z=a[5];
 const t=performance.now();for(const e of h)rctl(me,{k:e.k,y:e.y,t,sl:0},e.dt);
-me.vy=0;me.a=ma;const ex=me.p.x-px,ez=me.p.z-pz;
-if(Math.hypot(ex,ez)<2.5){const w=.4;me.p.x=px+ex*w;me.p.z=pz+ez*w;me.v.x=vx+(me.v.x-vx)*w;me.v.z=vz+(me.v.z-vz)*w}}
-function snapIn(m){const a5=m.q[5],pr=pOk(a5,m);m.q.forEach((a,i)=>{const o=P[i];if(net.serverAuth&&(i===0||i===5)){if(!o.tp)o.tp=new T.Vector3();if(i===5)o.tp.copy(o.p);o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}const z=!o.tp;if(z)o.tp=new T.Vector3();o.tp.set(a[0],a[1],a[2]);
+me.vy=0;me.a=ma;const ex=me.p.x-px,ez=me.p.z-pz,err=Math.hypot(ex,ez);
+// Smooth reconciliation. A single delayed snapshot can no longer snap the player several metres.
+if(err>.01){const w=Math.min(.48,1.25/err);me.p.x=px+ex*w;me.p.z=pz+ez*w;me.v.x=vx+(me.v.x-vx)*w;me.v.z=vz+(me.v.z-vz)*w}}
+function snapIn(m){const a5=m.q[5],pr=pOk(a5,m);m.q.forEach((a,i)=>{const o=P[i];if(net.serverAuth&&(i===0||i===5)){if(!o.tp)o.tp=new T.Vector3();if(i===5)o.tp.copy(o.p);o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}const z=!o.tp;if(z)o.tp=new T.Vector3();o.tp.set(a[0],a[1],a[2]);o._tpAge=0;
 o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;
 if(net.serverAuth&&(i===0||i===5)){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}
 if(i===5&&pr){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}
-if(z||o.p.distanceTo(o.tp)>4)o.p.copy(o.tp);o.a=a[3];o.v.set(a[4],0,a[5]);o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9]});
+if(z)o.p.copy(o.tp);o.a=a[3];o.v.set(a[4],0,a[5]);o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9]});
 net.pf=a5[6]|a5[7]|a5[8];if(pr)reconcile(a5,m.a|0);else if(net.hist)net.hist.length=0;
-const k=m.b,z=!b.tp;if(z)b.tp=new T.Vector3();b.tp.set(k[0],k[1],k[2]);b.v.set(k[3],k[4],k[5]);b.cv=k[6];b.ct=k[7];b.cd=k[8];b.knuckle=k[9]||0;b.knuckleT=k[10]||0;b.knucklePhase=k[11]||0;b.rainVolley=k[12]||0;b.rainPhase=k[13]||0;b.rainBounces=k[14]||0;if(z||b.p.distanceTo(b.tp)>6)b.p.copy(b.tp);
+const k=m.b,z=!b.tp;if(z)b.tp=new T.Vector3();b.tp.set(k[0],k[1],k[2]);b.v.set(k[3],k[4],k[5]);b.cv=k[6];b.ct=k[7];b.cd=k[8];b.knuckle=k[9]||0;b.knuckleT=k[10]||0;b.knucklePhase=k[11]||0;b.rainVolley=k[12]||0;b.rainPhase=k[13]||0;b.rainBounces=k[14]||0;if(z||b.p.distanceTo(b.tp)>10)b.p.copy(b.tp);
 if(m.g[0]!=s0||m.g[1]!=s1){const t=m.g[1]>s1;s0=m.g[0];s1=m.g[1];$('s0').textContent=s0;$('s1').textContent=s1;toast(t?'Đội Đỏ ghi bàn':'Gooool! Đội Xanh ghi bàn',2.6);amp=3;confT=3;conf.visible=true;burst()}
 if(pg==='goal'&&m.ph==='play')yaw=Math.PI;pg=m.ph;tl=m.tl}
 function gstart(hs){if(net){net.hist=[];net.cin=null;net.pf=0;net.ps=0}ph='play';me=P[5];me.human=1;P[0].human=1;P[5].human=1;me.stamina=100;look(P[0],hs);look(P[5],sel);reset();yaw=Math.PI;s0=s1=0;$('s0').textContent=$('s1').textContent=0;pg='play';yaw=Math.PI;chg=0;charging=false;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}
@@ -1378,7 +1383,7 @@ if(wantSlide){wantSlide=false;net.tx({t:'sl'});if(me.sl<=0&&me.stun<=0){const f=
 skTick(dt);
 if((net.ts-=dt)<=0){net.ts=1/30;const y=+yaw.toFixed(3);net.cin={n:net.si=(net.si|0)+1,k,y};net.tx({t:'i',n:net.si,k,y})}
 const pd=pOn();if(pd)pRun(dt);if(net.serverAuth){if(me.p.y>0||me.vy>0){me.vy-=20*dt;me.p.y=Math.max(0,me.p.y+me.vy*dt);if(me.p.y===0)me.vy=0}applyServerPose(P[0],dt);sendServerPose(dt)}
-const q=1-Math.exp(-28*dt);P.forEach((o,i)=>{if(net.serverAuth&&(i===0||i===5))return;if(!o.tp)return;o.tp.x+=o.v.x*dt;o.tp.z+=o.v.z*dt;if(o===me&&pd){o.p.y+=(o.tp.y-o.p.y)*q;return}o.p.lerp(o.tp,q)});
+const q=1-Math.exp(-20*dt);P.forEach((o,i)=>{if(net.serverAuth&&(i===0||i===5))return;if(!o.tp)return;const age=o._tpAge||0,exdt=Math.min(dt,Math.max(0,.18-age));if(exdt>0){o.tp.x+=o.v.x*exdt;o.tp.z+=o.v.z*exdt}o._tpAge=Math.min(.18,age+dt);if(o===me&&pd){o.p.y+=(o.tp.y-o.p.y)*q;return}o.p.lerp(o.tp,q)});
 if(b.tp){gball(dt);b.p.lerp(b.tp,1-Math.exp(-45*dt));b.m.position.copy(b.p);const sp=Math.hypot(b.v.x,b.v.z);if(sp>.05&&b.knuckle<=0)b.m.rotateOnWorldAxis(new T.Vector3(b.v.z,0,-b.v.x).normalize(),sp*dt/R)}}
 
 
@@ -1422,7 +1427,7 @@ if(b.tp){gball(dt);b.p.lerp(b.tp,1-Math.exp(-45*dt));b.m.position.copy(b.p);cons
 const mg=$('mm').getContext('2d'),MX=x=>45+x/hx*40,MZ=z=>70+z/hz*65;function mini(){mg.clearRect(0,0,90,140);mg.fillStyle='#0e6b4d99';mg.fillRect(5,5,80,130);P.forEach(o=>{mg.fillStyle=o.human?'#5ee0ff':o.t?'#e5243b':'#1f4bff';const z=o.human?5:4;mg.fillRect(MX(o.p.x)-z/2,MZ(o.p.z)-z/2,z,z)});mg.fillStyle='#fff';mg.fillRect(MX(b.p.x)-2,MZ(b.p.z)-2,4,4)}
 const cpos=new T.Vector3(),pv=new T.Vector3();let last=performance.now(),t0=0,crowdAcc=0;try{stadiumIndex=cl(Number(localStorage.getItem('ego_stadium'))||0,0,STADIUMS.length-1)}catch(e){}paintStadium();crowd(0,0);reset();applyChar();title();
 function loop(n,bg){if(!bg)requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.033);last=n;t0+=dt;
-if(net&&!net.host)gstep(dt);else if(ph==='play'){step(dt);if(net&&net.host&&net.serverAuth)sendServerPose(dt)}else if(ph==='goal'){if(replayActive)updateGoalReplay(dt);else ball(dt);gt-=dt;if(gt<=0){replayActive=false;$('goalReplay').classList.remove('on');reset();ph='play';if(net&&net.host&&net.serverAuth)net.tx({t:'resetPose'});replayBuffer=[];toast('Đội '+(kteam?'Đỏ':'Xanh')+' giao bóng',1.6)}}else if(ph==='pen')penStep(dt);else if(ph==='pt'){ptT-=dt;if(ptT<=0)ptF()}
+if(net&&!net.host)gstep(dt);else if(ph==='play'){step(dt);if(net&&net.host&&net.serverAuth)sendServerPose(dt)}else if(ph==='goal'){if(replayActive)updateGoalReplay(dt);else ball(dt);gt-=dt;if(gt<=0){replayActive=false;$('goalReplay').classList.remove('on');reset();ph='play';if(net&&net.host){clearNetControlAfterReset();net.tx({t:'resetPose',at:Date.now()})}replayBuffer=[];toast('Đội '+(kteam?'Đỏ':'Xanh')+' giao bóng',1.6)}}else if(ph==='pen')penStep(dt);else if(ph==='pt'){ptT-=dt;if(ptT<=0)ptF()}
 if(ph==='play')recordReplay(dt);if(net&&net.host&&net.go&&(ph==='play'||ph==='goal')&&(net.ts-=dt)<=0){net.ts=1/30;net.tx(snap())}
 if(ph==='cs')me.a=t0*.9;
 if(ph==='pen')penAnim();

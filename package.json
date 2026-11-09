@@ -1,7 +1,8 @@
 {
-  "name": "ego-futsal-server",
+  "name": "ego-futsal-regional-gateway",
   "version": "1.0.0",
   "private": true,
+  "description": "Ego Futsal regional multiplayer room gateway",
   "scripts": {
     "start": "node server.js"
   },

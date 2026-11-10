@@ -800,7 +800,7 @@ const v=4+cfg.d*6;P.forEach(o=>{if(o.human)return;const q=o.t?v:7;o.s={spd:q,sht
 P.forEach(o=>o.stamina=100);reset();ph='play';$('menu').style.display='none';$('mm').style.display='';$('pk').style.display='none';$('ret').style.display='none';$('chg').classList.remove('pk');$('chg').style.display='';
 $('stg').textContent=cfg.n+' · Xanh vs '+cfg.o+' · '+pos+' · '+STADIUMS[stadiumIndex].n;$('help').textContent=(me.role==='gk'?HGK:helpTxt());$('tb-q').style.display=me.role==='gk'?'flex':'none';$('tb-e').style.display=me.role==='gk'?'flex':'none';toast(cfg.n+' · '+pos+' · '+(kteam?'Đỏ':'Xanh')+' giao bóng',2);
 try{const r=rd.domElement.requestPointerLock();if(r&&r.catch)r.catch(()=>{})}catch(e){}if(net&&net.host){net.go=1;net.tx({t:'go',sel})}}
-function reset(){P.forEach(o=>{o._serverPose=null;const dz=o.t?1:-1;o.p.set(o.sx,0,-dz*hz+dz*o.sd);o.v.set(0,0,0);o.a=o.t?0:Math.PI;o.cd=0;o.sl=o.stun=0;o.vy=o.hd=0;o.lz=0;o.hold=0;o.gx=0;o.dv=0;o.dc=0;o.spin=0;o.spinType='';o.imm=0;o.sa=0;o._flowGauge=0;o._flowTimer=0;o._haruMeteor=0;o._mioTouch=0;o._mioBallLock=false;o._tetsuWall=0;o._tetsuUsed=0});b.p.set(0,R,0);b.v.set(0,0,0);b.ct=0;b.cv=0;b.fire=0;b.knuckle=0;b.knuckleT=0;b.knucklePhase=0;b.rainVolley=0;b.rainPhase=0;b.rainBounces=0;b.rainImpactFx=0;b.rainFxT=0;b.volleyFx=0;b.soraShield=0;mioBallTrail.length=0;mioTrailClock=0;mioTrailWasActive=false;mioBallGhosts.forEach(g=>g.visible=false);clearMioPersonAfterimages();yaw=0;chg=0;charging=false;klock=5;kickerSet();if(window.__egoBossReset)window.__egoBossReset()}
+function reset(){P.forEach(o=>{o._serverPose=null;const dz=o.t?1:-1;o.p.set(o.sx,0,-dz*hz+dz*o.sd);o.v.set(0,0,0);o.a=o.t?0:Math.PI;o.cd=0;o.sl=o.slc=o.stun=0;o.hit=0;o.sv={x:0,z:0};o.vy=o.hd=0;o.lz=0;o.hold=0;o.gx=0;o.dv=0;o.dc=0;o.spin=0;o.spinType='';o.imm=0;o.sa=0;o._flowGauge=0;o._flowTimer=0;o._haruMeteor=0;o._mioTouch=0;o._mioBallLock=false;o._tetsuWall=0;o._tetsuUsed=0});b.p.set(0,R,0);b.v.set(0,0,0);b.ct=0;b.cv=0;b.fire=0;b.knuckle=0;b.knuckleT=0;b.knucklePhase=0;b.rainVolley=0;b.rainPhase=0;b.rainBounces=0;b.rainImpactFx=0;b.rainFxT=0;b.volleyFx=0;b.soraShield=0;mioBallTrail.length=0;mioTrailClock=0;mioTrailWasActive=false;mioBallGhosts.forEach(g=>g.visible=false);clearMioPersonAfterimages();yaw=0;chg=0;charging=false;klock=5;kickerSet();if(window.__egoBossReset)window.__egoBossReset()}
 function goal(t){startGoalReplay();ph='goal';gt=2.8;t?s1++:s0++;kteam=t?0:1;if(t===me.t){matchStats.goals++;addFlow(28,me);if(lastPasserTeam===t&&performance.now()-lastPassAt<6500)matchStats.assists++}lastPasserTeam=-1;$('s0').textContent=s0;$('s1').textContent=s1;toast(t?'Đội Đỏ ghi bàn':'GOAL! Đội Xanh ghi bàn',2.6);amp=3;confT=3;conf.visible=true;burst()}
 function end(){charging=false;chg=0;if(tour&&cfg.ko&&s0==s1){ph='pt';ptT=2.4;ptF=penInit;toast('Hòa! Chuẩn bị đá luân lưu',2.3);return}fin(-1)}
 function fin(pw){if(net&&net.host){net.go=0;net.tx({t:'end',a:s0,b:s1})}ph='end';charging=false;chg=0;$('pk').style.display='none';$('ret').style.display='none';$('chg').classList.remove('pk');$('chg').style.display='';
@@ -815,7 +815,7 @@ if(i==3&&win){show('🏆 VÔ ĐỊCH!',txt+'. '+CH[sel].n+' đưa đội Xanh l�
 if((i==1&&tour.pts<2)||(i==2&&!win)||(i==3&&!win)){show(i==3?'Á quân':'Bị loại',txt+'. '+(i==1?'Bạn chỉ có '+tour.pts+' điểm sau vòng loại, chưa đủ 2 điểm để đi tiếp.':i==2?'Bạn dừng bước ở bán kết.':'Chỉ thiếu một chút nữa là có cúp.'),bracketHTML(-1),[again,chp,mn]);return}
 const nt=i==0?(tour.pts==3?'Bạn có 3 điểm, đã chắc suất vào bán kết, vẫn còn trận 2 để đá.':tour.pts==1?'Ở trận 2 cần ít nhất hòa để đủ 2 điểm.':'Thua trận đầu vẫn còn trận 2, cần thắng để đi tiếp.'):i==1?'Bạn vào bán kết với '+tour.pts+' điểm.':'Bạn vào chung kết!';
 show(win?'Chiến thắng':w==1?'Thất bại':'Hòa',txt+'. '+nt,bracketHTML(i+1),[['Trận tiếp theo',()=>{tour.i++;startMatch()}],mn])}
-function shoot(){if(net&&!net.host){if(ph==='play'&&charging){if(me.charIndex===5)me._mioBallLock=false;const kk=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);net.tx({t:'sh',c:chg,m:mode,y:yaw,k:kk});matchStats.shots++;addFlow(7,me)}charging=false;chg=0;return}if(ph==='pen'){if(charging&&pn&&pn.k==0&&pn.st==='aim')penShoot();charging=false;return}
+function shoot(){if(net&&!net.host){if(ph==='play'&&charging){if(me.charIndex===5)me._mioBallLock=false;const kk=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);net.tx({t:'sh',c:chg,m:mode,y:yaw,k:kk});if(Math.hypot(b.p.x-me.p.x,b.p.z-me.p.z)<=2.05&&b.p.y<=1.65)me.cd=Math.max(me.cd||0,.4);matchStats.shots++;addFlow(7,me)}charging=false;chg=0;return}if(ph==='pen'){if(charging&&pn&&pn.k==0&&pn.st==='aim')penShoot();charging=false;return}
 const c=chg;charging=false;chg=0;if(ph!=='play')return;const ballWasLocked=!!(me.charIndex===5&&me._mioBallLock),ballGap=ballWasLocked?0:Math.hypot(b.p.x-me.p.x,b.p.z-me.p.z);if(ballWasLocked)me._mioBallLock=false;const volley=mode===0&&me.charIndex===2&&b.rainVolley>0&&b.rainPhase===2&&ballGap<2.85&&b.p.y>R+.12&&b.p.y<R+1.55;
 const f=fw(),r={x:Math.cos(yaw),z:Math.sin(yaw)},ego=mode===0&&c>.95,S=me.s,pm=.7+.06*S.sht,cm=.6+.08*S.tec,shotMul=(me.charIndex===1?1.7:1)*(flowLeft(me)>0?1.18:1),er=(Math.random()-.5)*(10-S.tec)*.022;let sd=(K.KeyD?1:0)-(K.KeyA?1:0);if(!sd)sd=((-me.p.x)*r.x+(hz*Math.sign(f.z)-me.p.z)*r.z)>0?1:-1;
 if(volley){matchStats.shots++;addFlow(8,me);me.spin=0;me.spinType='';me.sa=0;b.knuckle=0;b.knuckleT=0;b.fire=0;const power=Math.min(56,(29+c*12)*pm)*shotMul;b.v.set(f.x*power,5.2+c*2.8,f.z*power);b.cv=sd*6.5*cm;b.ct=.5;b.cd=.12;b.rainVolley=0;b.rainPhase=0;b.rainBounces=0;b.volleyFx=.85;b.rainFxT=0;b.rainImpactFx=0;b.soraShield=0;me.v.x+=f.x*1.8;me.v.z+=f.z*1.8;me.cd=.42;me.a=Math.atan2(f.x,f.z);for(let i=0;i<22;i++)zspark(b.p.x,b.p.y,b.p.z,[.75,.52,1],.5);toast('RAIN VOLLEY!',1.05);return}
@@ -826,7 +826,7 @@ else if(mode===3){const s=Math.min(38,(18+c*13)*pm)*shotMul;b.v.set(f.x*s,7.8+c*
 
 const ce=Math.cos(er),se=Math.sin(er),vx=b.v.x,vz=b.v.z;b.v.x=vx*ce-vz*se;b.v.z=vx*se+vz*ce;
 me.cd=.4;me.a=Math.atan2(f.x,f.z)}
-function passPlayer(actor=me){if(ph!=='play'||actor.sl>0||actor.stun>0||actor.spin>0)return false;if(net&&!net.host&&actor===me){if(!net.tx({t:'pa'}))return toast('Mạng đang nghẽn, chưa chuyền được',.8);if(actor.charIndex===5)actor._mioBallLock=false;matchStats.passes++;addFlow(14,actor);toast('CHUYỀN BÓNG!',.8);return true}
+function passPlayer(actor=me){if(ph!=='play'||actor.sl>0||actor.stun>0||actor.spin>0)return false;if(net&&!net.host&&actor===me){if(!net.tx({t:'pa'}))return toast('Mạng đang nghẽn, chưa chuyền được',.8);actor.cd=Math.max(actor.cd||0,.4);if(actor.charIndex===5)actor._mioBallLock=false;matchStats.passes++;addFlow(14,actor);toast('CHUYỀN BÓNG!',.8);return true}
  const gap=actor.charIndex===5&&actor._mioBallLock?0:Math.hypot(b.p.x-actor.p.x,b.p.z-actor.p.z),passRange=net&&net.host&&actor===P[5]?cl(1.95+(net.rtt||0)*.001,1.95,2.2):1.8;if(gap>passRange||b.p.y>1.35){if(actor===me)toast('Cần đến gần bóng để chuyền',.8);return false}
  const f={x:Math.sin(actor.a),z:Math.cos(actor.a)},team=actor.t,candidates=P.filter(q=>q!==actor&&q.t===team&&q.role!=='gk');let best=null,bestScore=-1e9;
  for(const q of candidates){const dx=q.p.x-actor.p.x,dz=q.p.z-actor.p.z,L=Math.hypot(dx,dz);if(L<3||L>23)continue;const forward=(dx*f.x+dz*f.z)/L;let lane=0;for(const e of P){if(e.t===team||e.role==='gk')continue;const u=cl(((e.p.x-actor.p.x)*dx+(e.p.z-actor.p.z)*dz)/(L*L),0,1);if(Math.hypot(actor.p.x+dx*u-e.p.x,actor.p.z+dz*u-e.p.z)<1.35)lane+=1.4}const open=Math.min(8,...P.filter(e=>e.t!==team&&e.role!=='gk').map(e=>Math.hypot(e.p.x-q.p.x,e.p.z-q.p.z)));const score=forward*7+open*.65-L*.11-lane;if(score>bestScore){bestScore=score;best=q}}
@@ -1037,13 +1037,30 @@ function clearNetControlAfterReset(){if(!net)return;const now=performance.now();
 function look(o,i){const c=CH[i],u=o.m.userData;o.charIndex=i;u.hair.color.setHex(c.h);hairdo(o.m,c.hs);u.skin.color.setHex(c.k);if(u.band){u.band.color.setHex(c.b);u.ring.color.setHex(c.b)}}
 function lan(role,pin){if(location.protocol!=='http:'&&location.protocol!=='https:')return lob('Bạn đang mở file HTML trực tiếp. Hãy mở game bằng địa chỉ web của máy chủ trung tâm (https://...).',[['Về menu',title]]);const u=location.host;
 let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+u+'/ws')}catch(e){return lob('Không thể mở kết nối tới máy chủ trung tâm.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}
-const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>{if(w.readyState!==1)return false;const q=w.bufferedAmount||0;if((m.t==='i'&&q>24576)||(m.t==='s'&&q>65536)||(m.t==='pos'&&q>24576))return false;if(q>262144){try{w.close(4001,'network buffer exceeded')}catch(_){}return false}try{w.send(JSON.stringify(m));return true}catch(_){return false}};
+const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>{if(w.readyState!==1)return false;const q=w.bufferedAmount||0;if((m.t==='i'&&q>4096)||(m.t==='s'&&q>12288)||(m.t==='pos'&&q>4096))return false;if(q>131072){try{w.close(4001,'network buffer exceeded')}catch(_){}return false}try{w.send(JSON.stringify(m));return true}catch(_){return false}};
 if(!n.host)P[5].s=stt(sel);lob('Đang kết nối máy chủ trung tâm '+u+'...',[['Hủy',title]]);
 w.onopen=()=>n.tx({t:role,sel,pin});w.onmessage=e=>{if(net===n){try{onNet(JSON.parse(e.data))}catch(_){}}};
 w.onerror=()=>{};w.onclose=()=>{if(net===n){net=null;clearInterval(n.pingTimer);me=P[0];P[5].human=0;lob(n.ok?'Mất kết nối với máy chủ trung tâm.':'Không kết nối được máy chủ. Hãy kiểm tra địa chỉ VPS và trạng thái server.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}}}
 function sendServerPose(dt){if(!net||!net.serverAuth||!net.ok||ph!=='play')return;net.poseTs=(net.poseTs||0)-dt;if(net.poseTs>0)return;net.poseTs=1/30;const o=me;net.tx({t:'pos',n:net.poseSeq=(net.poseSeq|0)+1,x:f2(o.p.x),y:f2(o.p.y),z:f2(o.p.z),a:f2(o.a),vx:f2(o.v.x),vy:f2(o.vy||0),vz:f2(o.v.z),sl:o.sl>0?1:0,st:o.stun>0?1:0,hd:o.hd>0?1:0,lz:f2(o.lz||0)});}
 function receiveServerPose(m){if(!net||!net.serverAuth||m.p===net.slot)return;const idx=m.p===0?0:5,o=P[idx];if(!o)return;const old=o._serverPose;if(old&&Number(m.n||0)<=Number(old.n||0))return;o._serverPose={x:m.x,y:m.y,z:m.z,a:m.a,vx:m.vx,vy:m.vy,vz:m.vz,sl:m.sl,st:m.st,hd:m.hd,lz:m.lz,n:m.n||0,at:performance.now()};o.human=true;}
-function applyServerPose(o,dt){const p=o&&o._serverPose;if(!p)return;const age=cl((performance.now()-(p.at||performance.now()))/1000,0,.12),tx=p.x+p.vx*age,ty=cl(p.y+p.vy*age-10*age*age,0,4),tz=p.z+p.vz*age,dist=Math.hypot(tx-o.p.x,ty-o.p.y,tz-o.p.z);/* Never hard-snap a player across the pitch because of one delayed packet. */const k=1-Math.exp(-(dist>5?22:17)*dt),maxStep=Math.max(.12,dt*24),dx=cl((tx-o.p.x)*k,-maxStep,maxStep),dy=cl((ty-o.p.y)*k,-maxStep,maxStep),dz=cl((tz-o.p.z)*k,-maxStep,maxStep);o.p.x+=dx;o.p.y+=dy;o.p.z+=dz;o.a=ang(o.a,p.a,k);o.v.x+=(p.vx-o.v.x)*k;o.v.z+=(p.vz-o.v.z)*k;o.vy=p.vy;o.sl=p.sl?Math.max(o.sl,0.08):Math.min(o.sl,0);o.stun=p.st?Math.max(o.stun,0.08):Math.min(o.stun,0);o.hd=p.hd?Math.max(o.hd,0.08):Math.min(o.hd,0);o.lz=p.lz;}function applyGuestKickoffConstraint(){if(!net||net.host||!net.serverAuth||(net.remoteKlock||0)<=0||!me||me.t===(net.remoteKteam|0))return;const s=me.t?-1:1;let x=me.p.x,z=s*Math.max(.4,me.p.z*s),d=Math.hypot(x,z);if(d<4.5){x*=4.5/d;z*=4.5/d}if(Math.abs(x-me.p.x)>.001||Math.abs(z-me.p.z)>.001){me.p.x=x;me.p.z=z;me.v.x*=.2;me.v.z*=.2}}
+function applyServerPose(o,dt){
+  const p=o&&o._serverPose;
+  if(!p)return;
+  const age=cl((performance.now()-(p.at||performance.now()))/1000,0,.12);
+  const tx=p.x+p.vx*age,ty=cl(p.y+p.vy*age-10*age*age,0,4),tz=p.z+p.vz*age;
+  const dist=Math.hypot(tx-o.p.x,ty-o.p.y,tz-o.p.z);
+  const k=1-Math.exp(-(dist>5?22:17)*dt),maxStep=Math.max(.12,dt*24);
+  const dx=cl((tx-o.p.x)*k,-maxStep,maxStep),dy=cl((ty-o.p.y)*k,-maxStep,maxStep),dz=cl((tz-o.p.z)*k,-maxStep,maxStep);
+  o.p.x+=dx;o.p.y+=dy;o.p.z+=dz;
+  o.a=ang(o.a,p.a,k);
+  o.v.x+=(p.vx-o.v.x)*k;o.v.z+=(p.vz-o.v.z)*k;o.vy=p.vy;
+  // The remote client cannot know about a tackle on the host until the next
+  // snapshot. A false flag must not instantly clear a host-authoritative stun.
+  if(p.sl)o.sl=Math.max(o.sl||0,.08);
+  if(p.st)o.stun=Math.max(o.stun||0,.08);
+  if(p.hd)o.hd=Math.max(o.hd||0,.08);
+  o.lz=p.lz;
+}function applyGuestKickoffConstraint(){if(!net||net.host||!net.serverAuth||(net.remoteKlock||0)<=0||!me||me.t===(net.remoteKteam|0))return;const s=me.t?-1:1;let x=me.p.x,z=s*Math.max(.4,me.p.z*s),d=Math.hypot(x,z);if(d<4.5){x*=4.5/d;z*=4.5/d}if(Math.abs(x-me.p.x)>.001||Math.abs(z-me.p.z)>.001){me.p.x=x;me.p.z=z;me.v.x*=.2;me.v.z*=.2}}
 function onNet(m){const n=net,h=n.host;
 if(m.t=='c')return chatAdd(h?'Đỏ':'Xanh',String(m.x).slice(0,120));
 if(m.t=='hp'){n.rtt=Math.max(0,Date.now()-Number(m.s||Date.now()));n.rttAt=performance.now();return}
@@ -1322,7 +1339,7 @@ const t=performance.now();for(const e of h)rctl(me,{k:e.k,y:e.y,t,sl:0},e.dt);
 me.vy=0;me.a=ma;const ex=me.p.x-px,ez=me.p.z-pz,err=Math.hypot(ex,ez);
 // Smooth reconciliation. A single delayed snapshot can no longer snap the player several metres.
 if(err>.01){const w=Math.min(.48,1.25/err);me.p.x=px+ex*w;me.p.z=pz+ez*w;me.v.x=vx+(me.v.x-vx)*w;me.v.z=vz+(me.v.z-vz)*w}}
-function snapIn(m){if(net&&!net.host){if(Number.isFinite(m.kl))net.remoteKlock=cl(m.kl,0,5);if(Number.isFinite(m.kt))net.remoteKteam=m.kt?1:0}const a5=m.q[5],pr=pOk(a5,m);m.q.forEach((a,i)=>{const o=P[i];if(net.serverAuth&&(i===0||i===5)){if(!o.tp)o.tp=new T.Vector3();if(i===5)o.tp.copy(o.p);o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}const z=!o.tp;if(z)o.tp=new T.Vector3();o.tp.set(a[0],a[1],a[2]);o._tpAge=0;
+function snapIn(m){if(net&&!net.host){if(Number.isFinite(m.kl))net.remoteKlock=cl(m.kl,0,5);if(Number.isFinite(m.kt))net.remoteKteam=m.kt?1:0}const a5=m.q[5],pr=pOk(a5,m);m.q.forEach((a,i)=>{const o=P[i];if(net.serverAuth&&(i===0||i===5)){if(!o.tp)o.tp=new T.Vector3();if(i===5)o.tp.copy(o.p);o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;const localHuman=i===(net.host?0:5);if(localHuman){if(a[6])o.sl=Math.max(o.sl||0,.05);if(a[7])o.stun=Math.max(o.stun||0,.08);if(a[8])o.hd=Math.max(o.hd||0,.06);o.cd=Math.max(o.cd||0,Number(a[9])||0)}else{o.sl=a[6]?Math.max(o.sl||0,.08):o.sl;o.stun=a[7]?Math.max(o.stun||0,.08):o.stun;o.hd=a[8]?Math.max(o.hd||0,.06):o.hd;o.cd=a[9]}return}const z=!o.tp;if(z)o.tp=new T.Vector3();o.tp.set(a[0],a[1],a[2]);o._tpAge=0;
 o.spin=a[10]||0;o.spinType=o.spin?(a[11]?'rain':'spin'):'';o.sa=a[12]||0;o._skillBoost=a[13]||0;o._skillMainCd=a[14]||0;o._skillRainCd=a[15]||0;o._flowTimer=a[16]||0;o._haruMeteor=a[17]||0;o._mioTouch=a[18]||0;o._tetsuWall=a[19]||0;
 if(net.serverAuth&&(i===0||i===5)){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}
 if(i===5&&pr){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}
@@ -1375,16 +1392,105 @@ function gball(dt){
  const lim=az>hz?GW/2:hx;
  if(Math.abs(p.x)>lim-R){p.x=Math.sign(p.x)*(lim-R);v.x*=-.6}
 }
-function gstep(dt){if(ph!=='play')return;me._flowTimer=Math.max(0,(me._flowTimer||0)-dt);
-const k=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);
-if(K.KeyE||K.ArrowRight)yaw+=1.8*dt;if(K.KeyQ||K.ArrowLeft)yaw-=1.8*dt;
-if(charging)chg=Math.min(1,chg+dt*(.85+.05*me.s.tec));
-if(wantSlide){wantSlide=false;net.tx({t:'sl'});if(me.sl<=0&&me.stun<=0){const f={x:Math.sin(yaw),z:-Math.cos(yaw)},r={x:Math.cos(yaw),z:Math.sin(yaw)},ix=(K.KeyD?1:0)-(K.KeyA?1:0),iz=(K.KeyW?1:0)-(K.KeyS?1:0),L=Math.hypot(ix,iz);slide(me,L?(f.x*iz+r.x*ix)/L:f.x,L?(f.z*iz+r.z*ix)/L:f.z)}}
-skTick(dt);
-if((net.ts-=dt)<=0){net.ts=1/30;const y=+yaw.toFixed(3);net.cin={n:net.si=(net.si|0)+1,k,y};net.tx({t:'i',n:net.si,k,y})}
-const pd=pOn();if(net.serverAuth){/* Position-stream mode: predict the local player continuously and send its pose to the host. Do not reconcile this same player against stale snapshots. */rctl(me,{k,y:yaw,t:performance.now(),sl:0},dt);applyGuestKickoffConstraint();if(me.p.y>0||me.vy>0){me.vy-=20*dt;me.p.y=Math.max(0,me.p.y+me.vy*dt);if(me.p.y===0)me.vy=0}applyServerPose(P[0],dt);sendServerPose(dt)}else if(pd)pRun(dt);
-const q=1-Math.exp(-20*dt);P.forEach((o,i)=>{if(net.serverAuth&&(i===0||i===5))return;if(!o.tp)return;const age=o._tpAge||0,exdt=Math.min(dt,Math.max(0,.18-age));if(exdt>0){o.tp.x+=o.v.x*exdt;o.tp.z+=o.v.z*exdt}o._tpAge=Math.min(.18,age+dt);if(o===me&&pd){o.p.y+=(o.tp.y-o.p.y)*q;return}o.p.lerp(o.tp,q)});
-if(b.tp){gball(dt);b.p.lerp(b.tp,1-Math.exp(-45*dt));b.m.position.copy(b.p);const sp=Math.hypot(b.v.x,b.v.z);if(sp>.05&&b.knuckle<=0)b.m.rotateOnWorldAxis(new T.Vector3(b.v.z,0,-b.v.x).normalize(),sp*dt/R)}}
+function tickGuestPlayerTimers(o,dt){
+  if(!o)return;
+  o.sl=Math.max(0,(o.sl||0)-dt);
+  o.slc=Math.max(0,(o.slc||0)-dt);
+  o.stun=Math.max(0,(o.stun||0)-dt);
+  o.hd=Math.max(0,(o.hd||0)-dt);
+  o.imm=Math.max(0,(o.imm||0)-dt);
+  o.cd=Math.max(0,(o.cd||0)-dt);
+  o.dv=Math.max(0,(o.dv||0)-dt);
+  o.dc=Math.max(0,(o.dc||0)-dt);
+  o._skillBoost=Math.max(0,(o._skillBoost||0)-dt);
+  o._skillMainCd=Math.max(0,(o._skillMainCd||0)-dt);
+  o._skillRainCd=Math.max(0,(o._skillRainCd||0)-dt);
+  o._haruMeteor=Math.max(0,(o._haruMeteor||0)-dt);
+  o._mioTouch=Math.max(0,(o._mioTouch||0)-dt);
+  o._tetsuWall=Math.max(0,(o._tetsuWall||0)-dt);
+  if(o._mioTouch<=0)o._mioBallLock=false;
+}
+function predictGuestBallTouch(){
+  if(!net||net.host||!net.serverAuth||ph!=='play'||!b.tp||!me||me.role==='gk')return;
+  const o=me,p=b.tp,dx=p.x-o.p.x,dz=p.z-o.p.z,d=Math.hypot(dx,dz);
+  if(p.y>=1.0||d>1.35)return;
+  if(o.sl>0&&!o.hit&&d<1.3){
+    b.v.set((o.sv&&o.sv.x||o.v.x)*.9,1.5,(o.sv&&o.sv.z||o.v.z)*.9);
+    b.ct=0;o.hit=1;return;
+  }
+  if(o.sl>0||o.stun>0||o.spin>0||o.cd>0)return;
+  const radius=Math.min(1.35,1.08+Math.min(500,Math.max(0,net.rtt||0))*.00054);
+  if(d<radius){
+    const n=d||1;
+    b.v.x=o.v.x*1.15+dx/n*1.6;
+    b.v.z=o.v.z*1.15+dz/n*1.6;
+    b.v.y*=.3;
+    b.ct=0;
+  }
+}
+function gstep(dt){
+  if(ph!=='play')return;
+  me._flowTimer=Math.max(0,(me._flowTimer||0)-dt);
+  const k=(K.KeyW?1:0)|(K.KeyA?2:0)|(K.KeyS?4:0)|(K.KeyD?8:0)|(K.ShiftLeft?16:0)|(K.KeyZ?32:0);
+  if(K.KeyE||K.ArrowRight)yaw+=1.8*dt;
+  if(K.KeyQ||K.ArrowLeft)yaw-=1.8*dt;
+  if(charging)chg=Math.min(1,chg+dt*(.85+.05*me.s.tec));
+  if(wantSlide){
+    wantSlide=false;
+    // Position-stream mode already carries the slide flag in the pose packet;
+    // sending a second control packet only adds load to the relay queue.
+    if(!net.serverAuth)net.tx({t:'sl'});
+    if(me.sl<=0&&me.stun<=0){
+      const f={x:Math.sin(yaw),z:-Math.cos(yaw)},r={x:Math.cos(yaw),z:Math.sin(yaw)};
+      const ix=(K.KeyD?1:0)-(K.KeyA?1:0),iz=(K.KeyW?1:0)-(K.KeyS?1:0),L=Math.hypot(ix,iz);
+      slide(me,L?(f.x*iz+r.x*ix)/L:f.x,L?(f.z*iz+r.z*ix)/L:f.z);
+    }
+  }
+  skTick(dt);
+  if((net.ts-=dt)<=0){
+    net.ts=1/30;
+    const y=+yaw.toFixed(3);
+    net.cin={n:net.si=(net.si|0)+1,k,y};
+    // With the gateway pose stream enabled, i-packets are redundant: the host
+    // receives movement and slide state in pos. Keep i only for legacy relays.
+    if(!net.serverAuth)net.tx({t:'i',n:net.si,k,y});
+  }
+  const pd=pOn();
+  if(net.serverAuth){
+    rctl(me,{k,y:yaw,t:performance.now(),sl:0},dt);
+    applyGuestKickoffConstraint();
+    if(me.p.y>0||me.vy>0){me.vy-=20*dt;me.p.y=Math.max(0,me.p.y+me.vy*dt);if(me.p.y===0)me.vy=0;}
+    // gstep() replaces the normal step() for guests; explicitly tick all local
+    // state timers or slide/stun/cooldown states never expire on this client.
+    tickGuestPlayerTimers(me,dt);
+    applyServerPose(P[0],dt);
+    tickGuestPlayerTimers(P[0],dt);
+    sendServerPose(dt);
+  }else if(pd){
+    pRun(dt);
+    tickGuestPlayerTimers(me,dt);
+  }
+  const q=1-Math.exp(-20*dt);
+  P.forEach((o,i)=>{
+    if(net.serverAuth&&(i===0||i===5))return;
+    if(!o.tp)return;
+    const age=o._tpAge||0,exdt=Math.min(dt,Math.max(0,.18-age));
+    if(exdt>0){o.tp.x+=o.v.x*exdt;o.tp.z+=o.v.z*exdt;}
+    o._tpAge=Math.min(.18,age+dt);
+    if(o===me&&pd){o.p.y+=(o.tp.y-o.p.y)*q;return;}
+    o.p.lerp(o.tp,q);
+  });
+  if(b.tp){
+    gball(dt);
+    // Predict only the local player's immediate foot/slide contact for display.
+    // The room host remains authoritative and its next snapshot corrects this view.
+    if(net.serverAuth)predictGuestBallTouch();
+    b.p.lerp(b.tp,1-Math.exp(-45*dt));
+    b.m.position.copy(b.p);
+    const sp=Math.hypot(b.v.x,b.v.z);
+    if(sp>.05&&b.knuckle<=0)b.m.rotateOnWorldAxis(new T.Vector3(b.v.z,0,-b.v.x).normalize(),sp*dt/R);
+  }
+}
 
 
 // ===== MATCH MISSIONS / BOSS DUEL =====

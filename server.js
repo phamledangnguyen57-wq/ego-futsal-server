@@ -14,8 +14,9 @@ const HOST = process.env.HOST || '0.0.0.0';
 const GAME_FILE = path.join(__dirname, 'Ego-Futsal-Neutral-Server.html');
 const rooms = new Map();
 const MAX_FRAME = 64 * 1024;
-const MAX_BUFFERED = 256 * 1024;
-const DROP_TRANSIENT_AT = 64 * 1024;
+const MAX_BUFFERED = 128 * 1024;
+const DROP_SNAPSHOT_AT = 12 * 1024;
+const DROP_POSE_AT = 4 * 1024;
 const FORWARD_TYPES = new Set(['i', 'sl', 'sh', 'pa', 'sk', 'c', 's', 'go', 'resetPose', 'end', 'skno']);
 
 function codeOf(v) {
@@ -52,9 +53,10 @@ function send(ws, obj) {
     const json = JSON.stringify(obj);
     if (Buffer.byteLength(json) > MAX_FRAME) return false;
     const transient = obj && (obj.t === 'pos' || obj.t === 's' || obj.t === 'i');
-    // Do not build a long queue of obsolete coordinates/snapshots. A newer
-    // update will arrive shortly; dropping the stale one is better than lag.
-    if (transient && ws.writableLength > DROP_TRANSIENT_AT) return false;
+    // Keep a much shorter queue: snapshots are comparatively large, while
+    // pose/input packets are small. Prefer current state over stale backlog.
+    const dropAt = obj && obj.t === 's' ? DROP_SNAPSHOT_AT : DROP_POSE_AT;
+    if (transient && ws.writableLength > dropAt) return false;
     if (ws.writableLength > MAX_BUFFERED) {
       ws.destroy();
       return false;

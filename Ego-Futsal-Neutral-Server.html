@@ -838,7 +838,7 @@ addEventListener('mousedown',e=>{if(e.button!=0)return;if(net&&!net.host&&ph==='
 addEventListener('mousemove',e=>{if(document.pointerLockElement||e.buttons&2)yaw+=e.movementX*.003});addEventListener('contextmenu',e=>e.preventDefault());
 $('ex').onclick=e=>{const st=e.target.closest&&e.target.closest('.stadium-option');if(st){applyStadium(st.dataset.stadium);csScreen();return}const c=e.target.closest&&e.target.closest('.cc');if(c){sel=+c.dataset.i;applyChar();if(ph==='cs')csScreen()}};
 function head(o,dx,dz,pw){const n=Math.hypot(dx,dz)||1,hy=b.p.y-o.p.y,meteor=o._haruMeteor>0&&o.charIndex===4,k=pw*(.8+.04*o.s.air)*(meteor?1.75:1);b.v.set(dx/n*k*(meteor?1.18:1),meteor?-1.0:(hy>1.9?-1.5:2.2),dz/n*k*(meteor?1.18:1));b.ct=0;o.cd=.45;o.hd=.35;if(meteor){o._haruMeteor=0;for(let i=0;i<18;i++)zspark(b.p.x+(Math.random()-.5)*.65,b.p.y+(Math.random()-.5)*.5,b.p.z+(Math.random()-.5)*.65,[1,.82,.22],.6);toast('METEOR HEADER!',1.0)}else if(o.human)toast('Đánh đầu!',.6)}
-function slide(o,dx,dz){if(o.sl>0||o.slc>0||o.stun>0)return;const n=Math.hypot(dx,dz)||1,sv=10.5*(.8+.04*o.s.def);o.sl=.55;o.slc=1.7-.08*o.s.def;o.hit=0;o.sv={x:dx/n*sv,z:dz/n*sv};o.a=Math.atan2(dx,dz)}
+function slide(o,dx,dz){if(o.sl>0||o.slc>0||o.stun>0)return;const n=Math.hypot(dx,dz)||1,sv=10.5*(.8+.04*o.s.def);o.sl=.55;o.slc=1.7-.08*o.s.def;o.hit=0;o.sv={x:dx/n*sv,z:dz/n*sv};if(o===me&&net&&net.serverAuth&&!net.host)net.slideSeq=(net.slideSeq|0)+1;o.a=Math.atan2(dx,dz)}
 function move(o,tx,tz,dt,acc){if(o.sl>0){tx=o.sv.x*(.4+o.sl);tz=o.sv.z*(.4+o.sl);acc=30}else if(o.stun>0){tx=tz=0;acc=10}const k=Math.min(1,acc*dt);o.v.x+=(tx-o.v.x)*k;o.v.z+=(tz-o.v.z)*k;o.p.x=cl(o.p.x+o.v.x*dt,-hx+.5,hx-.5);o.p.z=cl(o.p.z+o.v.z*dt,-hz+.5,hz-.5)}
 function ball(dt){const v=b.v,p=b.p;b.rainVolley=Math.max(0,(b.rainVolley||0)-dt);b.soraShield=Math.max(0,(b.soraShield||0)-dt);b.volleyFx=Math.max(0,(b.volleyFx||0)-dt);if(b.rainVolley<=0&&b.rainPhase!==0)b.rainPhase=0;
 // Khi Phantom Touch đang giữ bóng, bóng thật khoá ngay trước chân Mio thay vì tiếp tục lăn theo vật lý.
@@ -1017,10 +1017,10 @@ let net=null,pg='play';
 const stt=i=>{const s=CH[i].s;return{spd:s[0],sht:s[1],tec:s[2],def:s[3],air:s[4]}},f2=x=>+x.toFixed(2);
 const lb=()=>gm=='lh'?['Tạo phòng',()=>pinScr('h')]:gm=='lg'?['Vào phòng',()=>pinScr('g')]:[gm=='tour'?'Vào giải đấu':'Vào sân',gm=='tour'?startTour:startFriendly];
 function lob(p,btns,ex){ph='end';show('Phòng LAN',p,ex||'',btns)}
-function lanMenu(){show('CHƠI ONLINE · MÁY CHỦ TRUNG TÂM','Hai máy kết nối cùng máy chủ Render qua WebSocket bảo mật. Máy chủ chuyển tiếp input và trạng thái; máy chủ phòng mô phỏng bóng/va chạm. Game không truyền hình ảnh màn hình.','',[['Tạo phòng',()=>{gm='lh';csScreen()}],['Vào phòng',()=>{gm='lg';csScreen()}],['Kiểm tra kết nối',netTest],['Quay lại',title]])}
+function lanMenu(){show('CHƠI ONLINE · CHỌN ĐƯỜNG KẾT NỐI','Có hai cách chơi. WebRTC trực tiếp gửi dữ liệu trận đấu thẳng giữa hai máy, nên nên thử cách này khi ping Render cao. Nếu không nối được do NAT/tường lửa, cả hai chuyển sang máy chủ Render. Không truyền hình ảnh màn hình.','',[['Tạo phòng',()=>{gm='lh';csScreen()}],['Vào phòng',()=>{gm='lg';csScreen()}],['Kiểm tra kết nối',netTest],['Quay lại',title]])}
 function pinScr(role){const h=role=='h',A='ABCDEFGHJKLMNPQRSTUVWXYZ23456789',g=[0,0,0,0,0].map(()=>A[Math.random()*32|0]).join('');
-lob(h?'Tạo phòng trên máy chủ trung tâm. Gửi mã phòng cho người chơi thứ hai.':'Nhập mã phòng mà người chơi thứ nhất đã gửi. Cả hai cần mở game từ CÙNG địa chỉ máy chủ (không mở file HTML trực tiếp).',
-[[h?'Tạo phòng':'Vào phòng',()=>{const q=$('pin').value.trim().toUpperCase();if(q.length<3)return alert('Mã phòng cần ít nhất 3 ký tự');lan(role,q)}],['Nối thủ công (dự phòng)',()=>manual(role)],['Quay lại',()=>{gm=h?'lh':'lg';csScreen()}]],
+lob(h?'Nhập mã để tạo phòng. Người chơi còn lại cần dùng CÙNG mã và chọn cùng kiểu kết nối.':'Nhập mã phòng người chơi thứ nhất gửi. Hai máy cần chọn cùng kiểu kết nối.',
+[[h?'Kết nối trực tiếp · WebRTC (ưu tiên ping thấp)':'Vào trực tiếp · WebRTC (ưu tiên ping thấp)',()=>{const q=$('pin').value.trim().toUpperCase();if(q.length<3)return alert('Mã phòng cần ít nhất 3 ký tự');rtc(role,q)}],[h?'Tạo phòng qua Render (dự phòng)':'Vào phòng qua Render (dự phòng)',()=>{const q=$('pin').value.trim().toUpperCase();if(q.length<3)return alert('Mã phòng cần ít nhất 3 ký tự');lan(role,q)}],['Nối thủ công (khi WebRTC tự động không được)',()=>manual(role)],['Quay lại',()=>{gm=h?'lh':'lg';csScreen()}]],
 '<input id="pin" maxlength="12" autocomplete="off" value="'+(h?g:'')+'">');
 $('pin').onkeydown=e=>{if(e.code=='Enter')$('bt').firstChild.click()};$('pin').focus()}
 function chatAdd(who,t,self){const d=document.createElement('div'),b=document.createElement('b'),l=$('chatlog');b.textContent=who+':';b.style.color=self?'#5ee0ff':who=='Đỏ'?'#ff6b7d':'#7f9bff';d.append(b,t);l.append(d);while(l.children.length>6)l.firstChild.remove();setTimeout(()=>d.remove(),14000)}
@@ -1032,17 +1032,17 @@ addEventListener('keyup',e=>{if(e.target===ci)e.stopPropagation()},true);
 function lanOff(){if(net){const w=[net.w,net.pc,net.sig];clearInterval(net.pingTimer);try{net.wl&&net.wl.release()}catch(e){}net=null;w.forEach(x=>{try{x&&x.close()}catch(e){}})}me=P[0];P[5].human=0;pg='play'}
 // Clear stale movement and prediction history whenever the host resets kickoff.
 // The Render gateway relays resetPose; the room host still owns match simulation.
-function clearNetControlAfterReset(){if(!net)return;const now=performance.now();for(const key in K)K[key]=0;charging=false;chg=0;wantSlide=false;if(net.I){net.I.k=0;net.I.sl=0;net.I.y=net.host?Math.PI:yaw;net.I.t=now}if(Array.isArray(net.hist))net.hist.length=0;net.pf=0;net.ps=0;if(!net.host){net.cin={n:net.si|0,k:0,y:yaw};if(me){if(!me.tp)me.tp=new T.Vector3();me.tp.copy(me.p);me.v.set(0,0,0);me.vy=0}if(P[0]){if(!P[0].tp)P[0].tp=new T.Vector3();P[0].tp.copy(P[0].p)}}}
+function clearNetControlAfterReset(){if(!net)return;net.ballPrediction=null;net.touchSeq=0;if(me)me._guestTouchLatch=0;const now=performance.now();for(const key in K)K[key]=0;charging=false;chg=0;wantSlide=false;if(net.I){net.I.k=0;net.I.sl=0;net.I.y=net.host?Math.PI:yaw;net.I.t=now}if(Array.isArray(net.hist))net.hist.length=0;net.pf=0;net.ps=0;if(!net.host){net.cin={n:net.si|0,k:0,y:yaw};if(me){if(!me.tp)me.tp=new T.Vector3();me.tp.copy(me.p);me.v.set(0,0,0);me.vy=0}if(P[0]){if(!P[0].tp)P[0].tp=new T.Vector3();P[0].tp.copy(P[0].p)}}}
 
 function look(o,i){const c=CH[i],u=o.m.userData;o.charIndex=i;u.hair.color.setHex(c.h);hairdo(o.m,c.hs);u.skin.color.setHex(c.k);if(u.band){u.band.color.setHex(c.b);u.ring.color.setHex(c.b)}}
 function lan(role,pin){if(location.protocol!=='http:'&&location.protocol!=='https:')return lob('Bạn đang mở file HTML trực tiếp. Hãy mở game bằng địa chỉ web của máy chủ trung tâm (https://...).',[['Về menu',title]]);const u=location.host;
 let w;try{w=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+u+'/ws')}catch(e){return lob('Không thể mở kết nối tới máy chủ trung tâm.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}
-const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>{if(w.readyState!==1)return false;const q=w.bufferedAmount||0;if((m.t==='i'&&q>4096)||(m.t==='s'&&q>12288)||(m.t==='pos'&&q>4096))return false;if(q>131072){try{w.close(4001,'network buffer exceeded')}catch(_){}return false}try{w.send(JSON.stringify(m));return true}catch(_){return false}};
+const n=net={host:role=='h',pin,w,u,ts:0,go:0,sl:0,ok:0,serverAuth:0,slot:role==='h'?0:1,poseTs:0,poseSeq:0,slideSeq:0,touchSeq:0,ballPrediction:null,remotePose:null,I:{k:0,y:0,sl:0}};n.tx=m=>{if(w.readyState!==1)return false;const q=w.bufferedAmount||0;if((m.t==='i'&&q>1024)||(m.t==='s'&&q>4096)||(m.t==='pos'&&q>1024))return false;if(q>65536){try{w.close(4001,'network buffer exceeded')}catch(_){}return false}try{w.send(JSON.stringify(m));return true}catch(_){return false}};
 if(!n.host)P[5].s=stt(sel);lob('Đang kết nối máy chủ trung tâm '+u+'...',[['Hủy',title]]);
 w.onopen=()=>n.tx({t:role,sel,pin});w.onmessage=e=>{if(net===n){try{onNet(JSON.parse(e.data))}catch(_){}}};
 w.onerror=()=>{};w.onclose=()=>{if(net===n){net=null;clearInterval(n.pingTimer);me=P[0];P[5].human=0;lob(n.ok?'Mất kết nối với máy chủ trung tâm.':'Không kết nối được máy chủ. Hãy kiểm tra địa chỉ VPS và trạng thái server.',[['Thử lại',()=>lan(role,pin)],['Về menu',title]])}}}
-function sendServerPose(dt){if(!net||!net.serverAuth||!net.ok||ph!=='play')return;net.poseTs=(net.poseTs||0)-dt;if(net.poseTs>0)return;net.poseTs=1/30;const o=me;net.tx({t:'pos',n:net.poseSeq=(net.poseSeq|0)+1,x:f2(o.p.x),y:f2(o.p.y),z:f2(o.p.z),a:f2(o.a),vx:f2(o.v.x),vy:f2(o.vy||0),vz:f2(o.v.z),sl:o.sl>0?1:0,st:o.stun>0?1:0,hd:o.hd>0?1:0,lz:f2(o.lz||0)});}
-function receiveServerPose(m){if(!net||!net.serverAuth||m.p===net.slot)return;const idx=m.p===0?0:5,o=P[idx];if(!o)return;const old=o._serverPose;if(old&&Number(m.n||0)<=Number(old.n||0))return;o._serverPose={x:m.x,y:m.y,z:m.z,a:m.a,vx:m.vx,vy:m.vy,vz:m.vz,sl:m.sl,st:m.st,hd:m.hd,lz:m.lz,n:m.n||0,at:performance.now()};o.human=true;}
+function sendServerPose(dt){if(!net||!net.serverAuth||!net.ok||ph!=='play')return;net.poseTs=(net.poseTs||0)-dt;if(net.poseTs>0)return;net.poseTs=1/30;const o=me;net.tx({t:'pos',n:net.poseSeq=(net.poseSeq|0)+1,x:f2(o.p.x),y:f2(o.p.y),z:f2(o.p.z),a:f2(o.a),vx:f2(o.v.x),vy:f2(o.vy||0),vz:f2(o.v.z),sl:o.sl>0?1:0,slt:f2(Math.max(0,o.sl||0)),svx:f2(o.sv&&o.sv.x||0),svz:f2(o.sv&&o.sv.z||0),sid:net.slideSeq|0,st:o.stun>0?1:0,hd:o.hd>0?1:0,lz:f2(o.lz||0)});}
+function receiveServerPose(m){if(!net||!net.serverAuth||m.p===net.slot)return;const idx=m.p===0?0:5,o=P[idx];if(!o)return;const old=o._serverPose;if(old&&Number(m.n||0)<=Number(old.n||0))return;const sid=Number(m.sid)||0;if(old&&sid!==Number(old.sid||0)){o.hit=0;o._remoteSlideId=sid}o._serverPose={x:m.x,y:m.y,z:m.z,a:m.a,vx:m.vx,vy:m.vy,vz:m.vz,sl:m.sl?1:0,slt:cl(Number(m.slt)||0,0,.65),svx:cl(Number(m.svx)||0,-15,15),svz:cl(Number(m.svz)||0,-15,15),sid,st:m.st,hd:m.hd,lz:m.lz,n:m.n||0,at:performance.now()};o.human=true;}
 function applyServerPose(o,dt){
   const p=o&&o._serverPose;
   if(!p)return;
@@ -1054,14 +1054,19 @@ function applyServerPose(o,dt){
   o.p.x+=dx;o.p.y+=dy;o.p.z+=dz;
   o.a=ang(o.a,p.a,k);
   o.v.x+=(p.vx-o.v.x)*k;o.v.z+=(p.vz-o.v.z)*k;o.vy=p.vy;
-  // The remote client cannot know about a tackle on the host until the next
-  // snapshot. A false flag must not instantly clear a host-authoritative stun.
-  if(p.sl)o.sl=Math.max(o.sl||0,.08);
-  if(p.st)o.stun=Math.max(o.stun||0,.08);
-  if(p.hd)o.hd=Math.max(o.hd||0,.08);
+  // Apply discrete remote actions once per fresh pose packet, never every render frame.
+  if(o._appliedPoseSeq!==p.n){
+    o._appliedPoseSeq=p.n;
+    if(p.sid!==undefined&&p.sid!==o._remoteSlideId){o._remoteSlideId=p.sid;o.hit=0;}
+    if(p.sl){o.sv.x=p.svx;o.sv.z=p.svz;o.sl=cl(p.slt||.06,0,.65);}
+    if(p.st)o.stun=Math.max(o.stun||0,.08);
+    if(p.hd)o.hd=Math.max(o.hd||0,.08);
+  }
   o.lz=p.lz;
 }function applyGuestKickoffConstraint(){if(!net||net.host||!net.serverAuth||(net.remoteKlock||0)<=0||!me||me.t===(net.remoteKteam|0))return;const s=me.t?-1:1;let x=me.p.x,z=s*Math.max(.4,me.p.z*s),d=Math.hypot(x,z);if(d<4.5){x*=4.5/d;z*=4.5/d}if(Math.abs(x-me.p.x)>.001||Math.abs(z-me.p.z)>.001){me.p.x=x;me.p.z=z;me.v.x*=.2;me.v.z*=.2}}
 function onNet(m){const n=net,h=n.host;
+if(m.t==='bta'){if(!h&&n.ballPrediction&&Number(m.id)===n.ballPrediction.id){n.ballPrediction.ack=m.ok?1:-1;if(!m.ok)n.ballPrediction.until=Math.min(n.ballPrediction.until,performance.now()+90)}return}
+if(m.t==='bt'&&h){const id=Math.floor(Number(m.id)||0),o=P[5];if(id<= (n.lastBallTouchId||0))return;n.lastBallTouchId=id;let ok=false;if(ph==='play'&&o&&o.human){const dx=b.p.x-o.p.x,dz=b.p.z-o.p.z,d=Math.hypot(dx,dz),kind=m.kind==='slide'?'slide':'foot';if(kind==='slide'){const sx=cl(Number(m.svx)||o.sv.x||0,-15,15),sz=cl(Number(m.svz)||o.sv.z||0,-15,15);if(d<=2.05&&b.p.y<1.45&&Math.hypot(sx,sz)>1){o.sv.x=sx;o.sv.z=sz;o.sl=Math.max(o.sl||0,.08);b.v.set(sx*.9,1.5,sz*.9);b.ct=0;o.hit=1;ok=true}}else if(o.sl<=0&&o.stun<=0&&o.spin<=0&&o.cd<=0&&d<=2.05&&b.p.y<1.4){const q=d||1;b.v.x=o.v.x*1.15+dx/q*1.6;b.v.z=o.v.z*1.15+dz/q*1.6;b.v.y*=.3;b.ct=0;o.cd=Math.max(o.cd||0,.07);ok=true}}n.tx({t:'bta',id,ok:ok?1:0});return}
 if(m.t=='c')return chatAdd(h?'Đỏ':'Xanh',String(m.x).slice(0,120));
 if(m.t=='hp'){n.rtt=Math.max(0,Date.now()-Number(m.s||Date.now()));n.rttAt=performance.now();return}
 if(m.t=='err'){n.live=0;return lob(m.m,[['Về menu',title]])}
@@ -1092,11 +1097,11 @@ const tr=t=>{n.log.push(((Date.now()-n.t0)/1000).toFixed(1)+'s '+t);if(n.log.len
 lock=()=>{try{if(navigator.wakeLock&&!n.wl&&!document.hidden)navigator.wakeLock.request('screen').then(l=>{if(net!==n)return l.release();n.wl=l;l.onrelease=()=>{if(n.wl===l)n.wl=null}}).catch(()=>0)}catch(e){}};
 n.tx=m=>{const snap=m.t==='s',c=snap&&C.u&&C.u.readyState==='open'?C.u:C.g;if(!c||c.readyState!=='open')return;/* Snapshot có thể bỏ khi nghẽn; input và lệnh gameplay đi trên kênh tin cậy để không mất thao tác. */if(c.bufferedAmount>(snap?65536:16384))return;try{c.send(JSON.stringify(m))}catch(e){}};
 if(!h)P[5].s=stt(sel);
-const bad=m=>{if(net===n&&!n.err){n.err=1;tr('LỖI: '+m.slice(0,50));lob(m,[['Chơi qua relay',()=>{lanOff();relay(role,pin)}],['Thử lại',()=>{lanOff();rtc(role,pin)}],['Nối thủ công',()=>manual(role)],['Về menu',title]],'<pre class="hn" style="white-space:pre-wrap;text-align:left;margin:10px 0 0">'+esc('Nhật ký kết nối (chụp màn hình gửi mình):\n'+n.log.join('\n'))+'</pre>')}},
-wait=()=>lob('Phòng '+k+' đang mở. Bạn của bạn mở game → Chơi LAN → Vào phòng → nhập mã '+k+'. Giữ trang này mở: nếu chuyển sang Zalo/Messenger để gửi mã thì quay lại ngay, game tự nối lại.',[['Hủy',title]]),
+const bad=m=>{if(net===n&&!n.err){n.err=1;tr('LỖI: '+m.slice(0,50));lob(m,[['Dùng máy chủ Render (dự phòng)',()=>{lanOff();lan(role,pin)}],['Thử WebRTC lại',()=>{lanOff();rtc(role,pin)}],['Nối thủ công',()=>manual(role)],['Về menu',title]],'<pre class="hn" style="white-space:pre-wrap;text-align:left;margin:10px 0 0">'+esc('Nhật ký kết nối (chụp màn hình gửi mình):\n'+n.log.join('\n'))+'</pre>')}},
+wait=()=>lob('Phòng '+k+' đang mở bằng WebRTC trực tiếp. Người chơi còn lại mở game → Chơi online → Vào phòng → nhập mã '+k+' → chọn “Vào trực tiếp · WebRTC”. Cả hai phải chọn WebRTC. Giữ trang này mở trong lúc ghép phòng.',[['Hủy',title]]),
 tell=(type,payload,dst)=>ws&&ws.readyState==1&&ws.send(JSON.stringify({type,payload,dst})),
-fail=()=>{if(net!==n||n.live)return;tr('ICE thất bại hoặc hết giờ');try{pc.close()}catch(e){}if(h)return ph==='end'&&wait();
-bad(ty.relay?'Đã dùng máy chủ TURN nhưng vẫn không nối được. Hãy thử lại.':ty.srflx?'Hai máy không nối thẳng được và TURN không phản hồi. Nếu một bên dùng 4G hoặc mạng công ty/trường, hãy đổi sang Wi-Fi khác hoặc vào Chơi LAN › Cài TURN riêng.':'Không lấy được địa chỉ công khai (STUN bị chặn). Tắt VPN/tường lửa hoặc đổi mạng, hoặc vào Chơi LAN › Kiểm tra mạng để xem chi tiết.')},
+fail=()=>{if(net!==n||n.live)return;tr('ICE thất bại hoặc hết giờ');try{pc.close()}catch(e){}
+const why=ty.relay?'Đã phải dùng TURN nhưng kết nối vẫn thất bại. Hãy thử lại hoặc dùng máy chủ Render.':ty.srflx?'Hai máy không nối trực tiếp được qua NAT. Hãy thử máy chủ Render hoặc nối thủ công.':'Không lấy được địa chỉ công khai (STUN bị chặn). Hãy thử máy chủ Render hoặc đổi mạng.';bad(why)},
 wire=(p,ch)=>{C[ch.label]=ch;ch.bufferedAmountLowThreshold=16384;
 ch.onopen=()=>{if(ch.label!='g'||pc!==p)return;n.live=n.ok=1;tr('kênh dữ liệu mở');/* Ping hai chiều qua kênh điều khiển đáng tin cậy. */clearInterval(n.pingTimer);n.pingTimer=setInterval(()=>{if(net===n&&C.g&&C.g.readyState==='open'){n.pingAt=performance.now();try{C.g.send(JSON.stringify({t:'p',s:n.pingAt}))}catch(e){}}},1000);if(!h){n.tx({t:'g',sel});onNet({t:'ok'});ws&&ws.close()}};
 ch.onmessage=e=>{if(net!==n||pc!==p)return;let m;try{m=JSON.parse(e.data)}catch(_){return}if(m.t=='p'){if(C.g&&C.g.readyState==='open')try{C.g.send(JSON.stringify({t:'p2',s:m.s}))}catch(_){}return}if(m.t=='p2'){const r=performance.now()-m.s;if(r>=0&&r<10000)n.rtt=n.rtt==null?r:n.rtt*.75+r*.25;return}if(m.t=='g')onNet({t:'j',sel:m.sel});else onNet(m)};
@@ -1345,10 +1350,10 @@ if(net.serverAuth&&(i===0||i===5)){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];ret
 if(i===5&&pr){o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9];return}
 if(z)o.p.copy(o.tp);o.a=a[3];o.v.set(a[4],0,a[5]);o.sl=a[6];o.stun=a[7];o.hd=a[8];o.cd=a[9]});
 net.pf=a5[6]|a5[7]|a5[8];if(pr)reconcile(a5,m.a|0);else if(net.hist)net.hist.length=0;
-const k=m.b,z=!b.tp;if(z)b.tp=new T.Vector3();b.tp.set(k[0],k[1],k[2]);b.v.set(k[3],k[4],k[5]);b.cv=k[6];b.ct=k[7];b.cd=k[8];b.knuckle=k[9]||0;b.knuckleT=k[10]||0;b.knucklePhase=k[11]||0;b.rainVolley=k[12]||0;b.rainPhase=k[13]||0;b.rainBounces=k[14]||0;if(z||b.p.distanceTo(b.tp)>10)b.p.copy(b.tp);
+const k=m.b,z=!b.tp;let holdPredictedBall=false;const bp=net&&!net.host&&net.serverAuth?net.ballPrediction:null;if(bp){const age=performance.now()-bp.at,svx=Number(k[3])||0,svz=Number(k[5])||0,ss=Math.hypot(svx,svz),ps=Math.hypot(bp.vx,bp.vz),align=ss>1&&ps>1?(svx*bp.vx+svz*bp.vz)/(ss*ps):0,moved=Math.hypot((Number(k[0])||0)-bp.ox,(Number(k[2])||0)-bp.oz)>.12;const confirmed=moved&&align>.74;if(confirmed||age>=bp.until-bp.at){net.ballPrediction=null;me._guestTouchLatch=confirmed?1:0}else holdPredictedBall=true}if(!holdPredictedBall){if(z)b.tp=new T.Vector3();b.tp.set(k[0],k[1],k[2]);b.v.set(k[3],k[4],k[5]);b.cv=k[6];b.ct=k[7];b.cd=k[8];b.knuckle=k[9]||0;b.knuckleT=k[10]||0;b.knucklePhase=k[11]||0;b.rainVolley=k[12]||0;b.rainPhase=k[13]||0;b.rainBounces=k[14]||0;if(z||b.p.distanceTo(b.tp)>10)b.p.copy(b.tp)}
 if(m.g[0]!=s0||m.g[1]!=s1){const t=m.g[1]>s1;s0=m.g[0];s1=m.g[1];$('s0').textContent=s0;$('s1').textContent=s1;toast(t?'Đội Đỏ ghi bàn':'Gooool! Đội Xanh ghi bàn',2.6);amp=3;confT=3;conf.visible=true;burst()}
 if(pg==='goal'&&m.ph==='play')yaw=Math.PI;pg=m.ph;tl=m.tl}
-function gstart(hs){if(net){net.hist=[];net.cin=null;net.pf=0;net.ps=0}ph='play';me=P[5];me.human=1;P[0].human=1;P[5].human=1;me.stamina=100;look(P[0],hs);look(P[5],sel);reset();yaw=Math.PI;s0=s1=0;$('s0').textContent=$('s1').textContent=0;pg='play';yaw=Math.PI;chg=0;charging=false;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}
+function gstart(hs){if(net){net.hist=[];net.cin=null;net.pf=0;net.ps=0;net.ballPrediction=null;net.touchSeq=0}ph='play';me=P[5];me._guestTouchLatch=0;me.human=1;P[0].human=1;P[5].human=1;me.stamina=100;look(P[0],hs);look(P[5],sel);reset();yaw=Math.PI;s0=s1=0;$('s0').textContent=$('s1').textContent=0;pg='play';yaw=Math.PI;chg=0;charging=false;P.forEach(o=>o.tp=null);b.tp=null;if(net&&!net.host){me.tp=me.p.clone();P[0].tp=P[0].p.clone()}
 $('menu').style.display='none';$('mm').style.display='';$('pk').style.display='none';$('ret').style.display='none';$('chg').classList.remove('pk');$('chg').style.display='';
 $('stg').textContent=net&&net.gateway?'SERVER RELAY · Xanh vs Đỏ · bạn là đội Đỏ':'LAN · Xanh vs Đỏ (bạn là đội Đỏ)';$('help').textContent=helpTxt();toast('Vào trận!',1.5);
 const needsLock=!!(net&&!net.host&&!matchMedia('(pointer:coarse)').matches&&!document.pointerLockElement);$('lockhint').style.display=needsLock?'block':'none';
@@ -1413,20 +1418,21 @@ function tickGuestPlayerTimers(o,dt){
 function predictGuestBallTouch(){
   if(!net||net.host||!net.serverAuth||ph!=='play'||!b.tp||!me||me.role==='gk')return;
   const o=me,p=b.tp,dx=p.x-o.p.x,dz=p.z-o.p.z,d=Math.hypot(dx,dz);
-  if(p.y>=1.0||d>1.35)return;
-  if(o.sl>0&&!o.hit&&d<1.3){
-    b.v.set((o.sv&&o.sv.x||o.v.x)*.9,1.5,(o.sv&&o.sv.z||o.v.z)*.9);
-    b.ct=0;o.hit=1;return;
-  }
-  if(o.sl>0||o.stun>0||o.spin>0||o.cd>0)return;
   const radius=Math.min(1.35,1.08+Math.min(500,Math.max(0,net.rtt||0))*.00054);
-  if(d<radius){
-    const n=d||1;
-    b.v.x=o.v.x*1.15+dx/n*1.6;
-    b.v.z=o.v.z*1.15+dz/n*1.6;
-    b.v.y*=.3;
-    b.ct=0;
+  // Release the local contact latch only after the ball has clearly left the foot.
+  if(d>radius+.45||p.y>1.35)o._guestTouchLatch=0;
+  if(o._guestTouchLatch|| (o.charIndex===5&&o._mioBallLock) || p.y>=1.0 || d>radius)return;
+  let kind='foot',vx=0,vz=0,vy=b.v.y*.3;
+  if(o.sl>0&&!o.hit&&d<1.3){
+    kind='slide';vx=(o.sv&&o.sv.x||o.v.x)*.9;vz=(o.sv&&o.sv.z||o.v.z)*.9;vy=1.5;o.hit=1;
+  }else{
+    if(o.sl>0||o.stun>0||o.spin>0||o.cd>0)return;
+    const q=d||1;vx=o.v.x*1.15+dx/q*1.6;vz=o.v.z*1.15+dz/q*1.6;
   }
+  b.v.set(vx,vy,vz);b.ct=0;o._guestTouchLatch=1;
+  const id=net.touchSeq=(net.touchSeq|0)+1,now=performance.now();
+  net.ballPrediction={id,kind,at:now,until:now+cl((net.rtt||0)*1.15+100,220,850),vx,vz,ox:p.x,oz:p.z,ack:0};
+  net.tx({t:'bt',id,kind,svx:f2(o.sv&&o.sv.x||0),svz:f2(o.sv&&o.sv.z||0)});
 }
 function gstep(dt){
   if(ph!=='play')return;

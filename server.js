@@ -14,10 +14,10 @@ const HOST = process.env.HOST || '0.0.0.0';
 const GAME_FILE = path.join(__dirname, 'Ego-Futsal-Neutral-Server.html');
 const rooms = new Map();
 const MAX_FRAME = 64 * 1024;
-const MAX_BUFFERED = 128 * 1024;
-const DROP_SNAPSHOT_AT = 12 * 1024;
-const DROP_POSE_AT = 4 * 1024;
-const FORWARD_TYPES = new Set(['i', 'sl', 'sh', 'pa', 'sk', 'c', 's', 'go', 'resetPose', 'end', 'skno']);
+const MAX_BUFFERED = 48 * 1024;
+const DROP_SNAPSHOT_AT = 4 * 1024;
+const DROP_POSE_AT = 1024;
+const FORWARD_TYPES = new Set(['i', 'sl', 'sh', 'pa', 'sk', 'bt', 'bta', 'c', 's', 'go', 'resetPose', 'end', 'skno']);
 
 function codeOf(v) {
   return String(v || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12);
@@ -172,7 +172,10 @@ function onMessage(ws, raw) {
       vx: clamp(finite(m.vx), -20, 20),
       vy: clamp(finite(m.vy), -12, 12),
       vz: clamp(finite(m.vz), -20, 20),
-      sl: m.sl ? 1 : 0, st: m.st ? 1 : 0, hd: m.hd ? 1 : 0,
+      svx: clamp(finite(m.svx), -15, 15),
+      svz: clamp(finite(m.svz), -15, 15),
+      sl: m.sl ? 1 : 0, slt: clamp(finite(m.slt), 0, .65), sid: Math.max(0, Math.floor(finite(m.sid))),
+      st: m.st ? 1 : 0, hd: m.hd ? 1 : 0,
       lz: clamp(finite(m.lz), -1.5, 1.5)
     });
   }
@@ -198,7 +201,10 @@ function onMessage(ws, raw) {
   // Only the host may publish match snapshots, start/end the match, or reset it.
   if (['s', 'go', 'resetPose', 'end'].includes(m.t) && ws.slot !== 0) return;
   // Only the guest may send direct player actions to the host.
-  if (['i', 'sl', 'sh', 'pa', 'sk'].includes(m.t) && ws.slot !== 1) return;
+  if (['i', 'sl', 'sh', 'pa', 'sk', 'bt'].includes(m.t) && ws.slot !== 1) return;
+  if (m.t === 'bta' && ws.slot !== 0) return;
+  if (m.t === 'bt') { m.id = Math.max(0, Math.floor(finite(m.id))); m.kind = m.kind === 'slide' ? 'slide' : 'foot'; m.svx = clamp(finite(m.svx), -15, 15); m.svz = clamp(finite(m.svz), -15, 15); }
+  if (m.t === 'bta') { m.id = Math.max(0, Math.floor(finite(m.id))); m.ok = m.ok ? 1 : 0; }
   if (m.t === 'c') m.x = String(m.x || '').slice(0, 120);
   if (m.t === 'sh') { m.c = clamp(finite(m.c), 0, 1); m.m = Math.floor(clamp(finite(m.m), 0, 3)); if (Number.isFinite(Number(m.y))) m.y = clamp(finite(m.y), -Math.PI, Math.PI); if (Number.isFinite(Number(m.k))) m.k = Math.floor(clamp(finite(m.k), 0, 63)); }
   if (m.t === 'sk') { m.which = m.which === 'rain' ? 'rain' : 'main'; if (Number.isFinite(Number(m.y))) m.y = clamp(finite(m.y), -Math.PI, Math.PI); if (Number.isFinite(Number(m.k))) m.k = Math.floor(clamp(finite(m.k), 0, 63)); }
